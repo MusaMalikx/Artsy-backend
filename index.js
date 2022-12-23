@@ -5,8 +5,9 @@ import userRoutes from "./routes/users.js";
 import authRoutes from "./routes/auth.js";
 import artworkRoutes from "./routes/artworks.js";
 import cookieParser from "cookie-parser";
-
+import cors from "cors";
 const app = express();
+
 dotenv.config();
 const MONGO = process.env.MONGO_URL || "mongodb://localhost:27017/Artsy";
 
@@ -25,6 +26,7 @@ const connect = () => {
 };
 
 app.use(cookieParser());
+app.use(cors());
 app.use(express.json());
 app.get("/", (req, res) => {
   res.status(200).send("Artsy Api is ROCKING LOL!");
