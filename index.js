@@ -8,7 +8,7 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 dotenv.config();
-const MONGO = "mongodb://localhost:27017/Artsy";
+const MONGO = process.env.MONGO_URL; //"mongodb://localhost:27017/Artsy";
 
 const connect = () => {
   mongoose.set("strictQuery", false);
