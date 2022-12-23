@@ -5,6 +5,7 @@ import userRoutes from "./routes/users.js";
 import authRoutes from "./routes/auth.js";
 import artworkRoutes from "./routes/artworks.js";
 import cookieParser from "cookie-parser";
+import res from "express/lib/response.js";
 
 const app = express();
 dotenv.config();
@@ -26,6 +27,9 @@ const connect = () => {
 
 app.use(cookieParser());
 app.use(express.json());
+app.get("/", (req, res) => {
+  res.status(200).send("Artsy Api is ROCKING LOL!")
+});
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/artworks", artworkRoutes);
