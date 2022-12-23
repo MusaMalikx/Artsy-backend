@@ -8,9 +8,13 @@ import jwt from "jsonwebtoken";
 
 export const signupUser = async (req ,res , next ) => {
     try {
-        const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync(req.body.password, salt);
-        const newUser = new User({ ...req.body, password: hash });
+        const checkbuyer = await User.findOne({ email: req.body.email });
+        if(checkbuyer) return next(createError(404, "Email already exists!"));
+
+        const checkartist =  await Artist.findOne({ email: req.body.email });
+        if(checkartist) return next(createError(404, "Email already exists For an Artist!"));
+
+        const newUser = new User({ ...req.body });
     
         await newUser.save();
         res.status(200).send("User has been created!");
@@ -19,11 +23,33 @@ export const signupUser = async (req ,res , next ) => {
       }
 }
 
-export const signupArtist = async (req ,res , next ) => {
+export const signinUser = async (req, res, next) => {
   try {
-      const salt = bcrypt.genSaltSync(10);
-      const hash = bcrypt.hashSync(req.body.password, salt);
-      const newArtist = new Artist({ ...req.body, password: hash });
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) return next(createError(404, "User not found!"));
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT);
+    
+    res
+      .cookie("access_token", token, {
+        httpOnly: true,
+      })
+      .status(200)
+      .json(user._doc);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const signupArtist = async (req ,res , next ) => {
+  try {      
+      const checkartist =  await Artist.findOne({ email: req.body.email });
+      if(checkartist) return next(createError(404, "Email already exists!"));
+
+      const checkbuyer = await User.findOne({ email: req.body.email });
+      if(checkbuyer) return next(createError(404, "Email already exists For a Buyer!"));
+
+      const newArtist = new Artist({ ...req.body });
   
       await newArtist.save();
       res.status(200).send("Artist has been created!");
@@ -37,52 +63,75 @@ export const signinArtist = async (req, res, next) => {
     const artist = await Artist.findOne({ email: req.body.email });
     if (!artist) return next(createError(404, "User not found!"));
 
-    const isCorrect = await bcrypt.compare(req.body.password, artist.password);
-
-    if (!isCorrect) return next(createError(400, "Wrong Credentials!"));
-
     const token = jwt.sign({ id: artist._id }, process.env.JWT);
-    const { password, ...others } = artist._doc;
+  
+    res
+      .cookie("access_token", token, {
+        httpOnly: true,
+      })
+      .status(200)
+      .json(artist._doc);
+  } catch (err) {
+    next(err);
+  }
+};
 
+export const signinAdmin = async (req, res, next) => {
+  try {
+    const user = await User.findOne({  isAdmin: true , email: req.body.email});
+    if (!user) return next(createError(401, "User not found!"));
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT);
     
     res
       .cookie("access_token", token, {
         httpOnly: true,
       })
       .status(200)
-      .json(others);
+      .json(user._doc);
   } catch (err) {
     next(err);
   }
 };
 
-export const signinUser = async (req, res, next) => {
+
+  export const googleAuthUser = async (req, res, next) => {
     try {
-      const artist = await User.findOne({ email: req.body.email });
-      if (!artist) return next(createError(404, "User not found!"));
-  
-      const isCorrect = await bcrypt.compare(req.body.password, artist.password);
-  
-      if (!isCorrect) return next(createError(400, "Wrong Credentials!"));
-  
-      const token = jwt.sign({ id: artist._id }, process.env.JWT);
-      const { password, ...others } = artist._doc;
-  
-      
-      res
-        .cookie("access_token", token, {
-          httpOnly: true,
-        })
-        .status(200)
-        .json(others);
+      const user = await User.findOne({ email: req.body.email });
+      if (user) {
+        const token = jwt.sign({ id: user._id }, process.env.JWT);
+        res
+          .cookie("access_token", token, {
+            httpOnly: true,
+          })
+          .status(200)
+          .json(user._doc);
+      } else {
+        const checkartist =  await Artist.findOne({ email: req.body.email });
+        if(checkartist) return next(createError(404, "Email already exists For an Artist!"));
+
+        const newUser = new User({
+          name: req.body.displayName,
+          email: req.body.email,
+          fromGoogle: true,
+        });
+        const savedUser = await newUser.save();
+        const token = jwt.sign({ id: savedUser._id }, process.env.JWT);
+        res
+          .cookie("access_token", token, {
+            httpOnly: true,
+          })
+          .status(200)
+          .json(savedUser._doc);
+      }
     } catch (err) {
       next(err);
     }
   };
 
-  export const googleAuthUser = async (req, res, next) => {
+  export const googleAuthArtist = async (req, res, next) => {
     try {
-      const artist = await User.findOne({ email: req.body.email });
+      const artist = await Artist.findOne({ email: req.body.email });
       if (artist) {
         const token = jwt.sign({ id: artist._id }, process.env.JWT);
         res
@@ -92,8 +141,12 @@ export const signinUser = async (req, res, next) => {
           .status(200)
           .json(artist._doc);
       } else {
-        const newUser = new User({
-          ...req.body,
+        const checkbuyer = await User.findOne({ email: req.body.email });
+        if(checkbuyer) return next(createError(404, "Email already exists For a Buyer!"));
+        
+        const newUser = new Artist({
+          name: req.body.displayName,
+          email: req.body.email,
           fromGoogle: true,
         });
         const savedUser = await newUser.save();
