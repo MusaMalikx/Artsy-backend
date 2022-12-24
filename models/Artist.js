@@ -6,15 +6,19 @@ const ArtistSchema = new mongoose.Schema(
         name: {
             type: String,
             required: true,
-            unique: true,
           },
           email: {
             type: String,
             required: true,
             unique: true,
           },
-          password: {
+          phonenumber: {
             type: String,
+            unique: true,
+          },
+          cnic: {
+            type: String,
+            unique: true,
           },
           fromGoogle: {
             type: Boolean,
@@ -22,9 +26,11 @@ const ArtistSchema = new mongoose.Schema(
           },
           experience: {
             type: String,
+            default: ''
           },
           address: {
             type: String,
+            default: ''
           },
     },
     { timestamps: true }

@@ -1,5 +1,5 @@
 import express from "express";
-import { signinUser, signupUser ,logout, googleAuthUser, signupArtist , signinArtist, googleAuthArtist , signinAdmin} from "../controllers/auth.js";
+import { signinUser, signupUser ,logout, googleAuthUser, signupArtist , signinArtist, googleAuthArtist , signinAdmin ,checkDetailsArtist , checkDetailsUser} from "../controllers/auth.js";
 
 const router = express.Router();
 
@@ -25,11 +25,13 @@ router.post("/artist/google", googleAuthArtist);
 //Signin Admin 
 router.post("/admin/signin" , signinAdmin);
 
-
-
 //Logout
 router.get("/logout", logout);
 
+//Check number and cnic
+router.post("/artist/check" , checkDetailsArtist);
 
+//Check number and cnic for User
+router.post("/user/check" , checkDetailsUser);
 
 export default router;

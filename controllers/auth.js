@@ -58,6 +58,38 @@ export const signupArtist = async (req ,res , next ) => {
     }
 }
 
+export const checkDetailsArtist = async (req, res, next) => {
+  try {
+    const artistnum = await Artist.findOne({ phonenumber: req.body.phonenumber });
+    if (artistnum) return next(createError(400, "PhoneNumber Already exists!"));
+
+    const artistcnic = await Artist.findOne({ cnic: req.body.cnic });
+    if(artistcnic) return next(createError(400, "cnic Already exists!"));
+    
+    if(!artistcnic && !artistnum)
+      return res.send({status: 200 , message: "Details Ok"});
+
+  } catch (err) {
+    next(err);
+  }
+}
+
+export const checkDetailsUser = async (req, res, next) => {
+  try {
+    const usernum = await User.findOne({ phonenumber: req.body.phonenumber });
+    if (usernum) return next(createError(400, "PhoneNumber Already exists!"));
+
+    const usercnic = await User.findOne({ cnic: req.body.cnic });
+    if(usercnic) return next(createError(400, "cnic Already exists!"));
+    
+    if(!usercnic && !usernum)
+      return res.send({status: 200 , message: "Details Ok"});
+
+  } catch (err) {
+    next(err);
+  }
+}
+
 export const signinArtist = async (req, res, next) => {
   try {
     const artist = await Artist.findOne({ email: req.body.email });
