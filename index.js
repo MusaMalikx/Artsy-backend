@@ -28,9 +28,7 @@ const connect = () => {
 app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
-app.get("/", (req, res) => {
-  res.status(200).send("Artsy Api is ROCKING LOL!");
-});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/artworks", artworkRoutes);

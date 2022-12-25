@@ -30,12 +30,12 @@ export const signinUser = async (req, res, next) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT);
     
-    res
-      .cookie("access_token", token, {
-        httpOnly: true,
-      })
-      .status(200)
-      .json(user._doc);
+    const object = {
+      token: token,
+      user: user._doc
+    }
+
+    res.status(200).json(object);
   } catch (err) {
     next(err);
   }
@@ -97,12 +97,12 @@ export const signinArtist = async (req, res, next) => {
 
     const token = jwt.sign({ id: artist._id }, process.env.JWT);
   
-    res
-      .cookie("access_token", token, {
-        httpOnly: true,
-      })
-      .status(200)
-      .json(artist._doc);
+    const object = {
+      token: token,
+      user: artist._doc
+    }
+
+    res.status(200).json(object);
   } catch (err) {
     next(err);
   }
@@ -115,12 +115,12 @@ export const signinAdmin = async (req, res, next) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT);
     
-    res
-      .cookie("access_token", token, {
-        httpOnly: true,
-      })
-      .status(200)
-      .json(user._doc);
+    const object = {
+      token: token,
+      user: user._doc
+    }
+
+    res.status(200).json(object);
   } catch (err) {
     next(err);
   }
@@ -132,12 +132,13 @@ export const signinAdmin = async (req, res, next) => {
       const user = await User.findOne({ email: req.body.email });
       if (user) {
         const token = jwt.sign({ id: user._id }, process.env.JWT);
-        res
-          .cookie("access_token", token, {
-            httpOnly: true,
-          })
-          .status(200)
-          .json(user._doc);
+        const object = {
+          token: token,
+          user: user._doc
+        }
+
+        res.status(200).json(object);
+
       } else {
         const checkartist =  await Artist.findOne({ email: req.body.email });
         if(checkartist) return next(createError(404, "Email already exists For an Artist!"));
@@ -150,12 +151,14 @@ export const signinAdmin = async (req, res, next) => {
         });
         const savedUser = await newUser.save();
         const token = jwt.sign({ id: savedUser._id }, process.env.JWT);
+
+        const object = {
+          token: token,
+          user: savedUser._doc
+        }
         res
-          .cookie("access_token", token, {
-            httpOnly: true,
-          })
           .status(200)
-          .json(savedUser._doc);
+          .json(object);
       }
     } catch (err) {
       next(err);
@@ -167,12 +170,13 @@ export const signinAdmin = async (req, res, next) => {
       const artist = await Artist.findOne({ email: req.body.email });
       if (artist) {
         const token = jwt.sign({ id: artist._id }, process.env.JWT);
+        const object = {
+          token: token,
+          user: artist._doc
+        }
         res
-          .cookie("access_token", token, {
-            httpOnly: true,
-          })
           .status(200)
-          .json(artist._doc);
+          .json(object);
       } else {
         const checkbuyer = await User.findOne({ email: req.body.email });
         if(checkbuyer) return next(createError(404, "Email already exists For a Buyer!"));
@@ -185,22 +189,24 @@ export const signinAdmin = async (req, res, next) => {
         });
         const savedUser = await newUser.save();
         const token = jwt.sign({ id: savedUser._id }, process.env.JWT);
+        const object = {
+          token: token,
+          user: savedUser._doc
+        }
         res
-          .cookie("access_token", token, {
-            httpOnly: true,
-          })
           .status(200)
-          .json(savedUser._doc);
+          .json(object);
       }
     } catch (err) {
       next(err);
     }
   };
 
+  //USED ONLY FOR COOKIES NOT USED FOR NOW
   export const logout = async (req, res, next) => {
     // Set token to none and expire after 5 seconds
   res.cookie('access_token', 'none', {
-      expires: new Date(Date.now() + 5 * 1000),
+      expires: new Date(Date.now() ),
       httpOnly: true,
   })
   res

@@ -28,12 +28,7 @@ const ArtworkSchema = new mongoose.Schema(
         },
         description: {
             type: String,
-        },
-        fromGoogle: {
-            type: Boolean,
-            default: false,
-          },
-
+        }
     }
 );
 
