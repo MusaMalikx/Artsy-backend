@@ -145,6 +145,7 @@ export const signinAdmin = async (req, res, next) => {
         const newUser = new User({
           name: req.body.displayName,
           email: req.body.email,
+          firebaseid: req.body.firebaseid,
           fromGoogle: true,
         });
         const savedUser = await newUser.save();
@@ -179,6 +180,7 @@ export const signinAdmin = async (req, res, next) => {
         const newUser = new Artist({
           name: req.body.displayName,
           email: req.body.email,
+          firebaseid: req.body.firebaseid,
           fromGoogle: true,
         });
         const savedUser = await newUser.save();
