@@ -27,6 +27,9 @@ const ArtworkSchema = new mongoose.Schema({
   description: {
     type: String,
   },
+  images: {
+    type: [String],
+  }
 });
 
 module.exports =  mongoose.model("Artworks", ArtworkSchema);

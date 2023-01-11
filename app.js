@@ -8,6 +8,8 @@ var cors = require("cors");
 const userRoutes = require("./routes/users.js");
 const authRoutes = require("./routes/auth.js");
 const artworkRoutes = require("./routes/artworks.js");
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/'});
 
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');

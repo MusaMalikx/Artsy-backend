@@ -7,12 +7,21 @@ const add = async (req, res, next) => {
     const artist = await Artist.findOne({ _id: req.user.id });
     if (!artist) return next(createError(404, "Artist Not logged in!"));
 
-    const newartwork = new Artworks({ artistId: req.user.id, ...req.body });
+    console.log(req.files , req.body.title , req.user.id);
+    const files = req.files;
+    const paths = files.map(file => file.path);  //All paths of images
+  
+    const newartwork = new Artworks({ artistId: req.user.id,images: paths, ...req.body });
     const savedArtwork = await newartwork.save();
     res.status(200).json(savedArtwork);
+
+    //Now to get the image in get request we can make a new router.get("/uploads") where we find the url and return the image
+    //Or we can make the uploads folder publically available so browser can access the images  in app.js write app.use('/uploads' , express.static('uploads'));
+
   } catch (err) {
     next(err);
   }
+
 };
 
 const checkduplicate = async (req, res, next) => {
