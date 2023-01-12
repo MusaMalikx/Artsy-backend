@@ -148,6 +148,7 @@ const googleAuthUser = async (req, res, next) => {
         email: req.body.email,
         firebaseid: req.body.firebaseid,
         fromGoogle: true,
+        imageURL: req.body.imageURL,
       });
       const savedUser = await newUser.save();
       const token = jwt.sign({ id: savedUser._id }, process.env.JWT);
@@ -183,6 +184,7 @@ const googleAuthArtist = async (req, res, next) => {
         email: req.body.email,
         firebaseid: req.body.firebaseid,
         fromGoogle: true,
+        imageURL: req.body.imageURL,
       });
       const savedUser = await newUser.save();
       const token = jwt.sign({ id: savedUser._id }, process.env.JWT);
