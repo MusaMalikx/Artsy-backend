@@ -3,8 +3,10 @@ const { verifyToken } = require("../utils/verifyToken.js");
 const {
   add,
   checkduplicate,
-  getallartworks,
+  getartistartworks,
   getartworkimage,
+  getallartworks,
+  getartworkartist,
 } = require("../controllers/artwork.js");
 const { upload } = require("../utils/artworksUpload.js");
 const router = express.Router();
@@ -15,10 +17,16 @@ router.post("/add", verifyToken, upload.array("productImage", 3), add);
 //Check Details
 router.post("/check", verifyToken, checkduplicate);
 
-//Get Artworks
-router.get("/artist", verifyToken, getallartworks);
+//Get Artworks Artist
+router.get("/artist", verifyToken, getartistartworks);
 
 //Get Artwork Image
 router.get("/image", getartworkimage);
+
+//Get All artworks
+router.get("/all", getallartworks);
+
+//Get artwork Artist name
+router.get("/madeby", getartworkartist);
 
 module.exports = router;

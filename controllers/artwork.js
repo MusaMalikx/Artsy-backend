@@ -52,7 +52,7 @@ const checkduplicate = async (req, res, next) => {
   }
 };
 
-const getallartworks = async (req, res, next) => {
+const getartistartworks = async (req, res, next) => {
   try {
     const artist = await Artist.findOne({ _id: req.user.id });
     if (!artist) return next(createError(404, "Artist Not logged in!"));
@@ -80,4 +80,32 @@ const getartworkimage = async (req, res, next) => {
   }
 };
 
-module.exports = { add, checkduplicate, getallartworks, getartworkimage };
+const getallartworks = async (req, res, next) => {
+  try {
+    const artworks = await Artworks.find({});
+    res.status(200).json(artworks);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getartworkartist = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({ _id: req.query.id });
+    if (!artist)
+      return next(createError(404, "Error Finding Artist Information!"));
+
+    res.status(200).json(artist.name);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  add,
+  checkduplicate,
+  getartistartworks,
+  getartworkimage,
+  getallartworks,
+  getartworkartist,
+};
