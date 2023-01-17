@@ -1,15 +1,28 @@
 const { createError } = require("../error.js");
 const Artworks = require("../models/Artwork.js");
 const Artist = require("../models/Artist.js");
+const fs = require("fs");
+const mime = require("mime");
 
 const add = async (req, res, next) => {
   try {
     const artist = await Artist.findOne({ _id: req.user.id });
     if (!artist) return next(createError(404, "Artist Not logged in!"));
 
-    const newartwork = new Artworks({ artistId: req.user.id, ...req.body });
+    console.log(req.files, req.body.title, req.user.id);
+    const files = req.files;
+    const paths = files.map((file) => file.path); //All paths of images
+
+    const newartwork = new Artworks({
+      artistId: req.user.id,
+      images: paths,
+      ...req.body,
+    });
     const savedArtwork = await newartwork.save();
     res.status(200).json(savedArtwork);
+
+    //Now to get the image in get request we can make a new router.get("/uploads") where we find the url and return the image
+    //Or we can make the uploads folder publically available so browser can access the images  in app.js write app.use('/uploads' , express.static('uploads'));
   } catch (err) {
     next(err);
   }
@@ -51,4 +64,20 @@ const getallartworks = async (req, res, next) => {
   }
 };
 
-module.exports = { add, checkduplicate, getallartworks };
+const getartworkimage = async (req, res, next) => {
+  try {
+    const path = `${req.query.filename}`;
+    const type = mime.getType(path);
+    fs.readFile(path, (err, data) => {
+      if (err) {
+        return next(createError(404, err.message));
+      }
+      res.contentType(type);
+      res.send(data);
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { add, checkduplicate, getallartworks, getartworkimage };

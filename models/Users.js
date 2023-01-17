@@ -17,11 +17,9 @@ const UserSchema = new mongoose.Schema(
     },
     phonenumber: {
       type: String,
-      unique: true,
     },
     cnic: {
       type: String,
-      unique: true,
     },
     fromGoogle: {
       type: Boolean,
@@ -30,6 +28,10 @@ const UserSchema = new mongoose.Schema(
     isAdmin: {
       type: Boolean,
       default: false,
+    },
+    imageURL: {
+      type: String,
+      default: "",
     },
   },
   { timestamps: true }
