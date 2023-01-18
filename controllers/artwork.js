@@ -28,7 +28,7 @@ const add = async (req, res, next) => {
   }
 };
 
-const checkduplicate = async (req, res, next) => {
+const checkDuplicate = async (req, res, next) => {
   try {
     const artist = await Artist.findOne({ _id: req.user.id });
     if (!artist) return next(createError(404, "Artist Not logged in!"));
@@ -52,7 +52,7 @@ const checkduplicate = async (req, res, next) => {
   }
 };
 
-const getartistartworks = async (req, res, next) => {
+const getArtistArtworks = async (req, res, next) => {
   try {
     const artist = await Artist.findOne({ _id: req.user.id });
     if (!artist) return next(createError(404, "Artist Not logged in!"));
@@ -64,7 +64,7 @@ const getartistartworks = async (req, res, next) => {
   }
 };
 
-const getartworkimage = async (req, res, next) => {
+const getArtworkImage = async (req, res, next) => {
   try {
     const path = `${req.query.filename}`;
     const type = mime.getType(path);
@@ -80,7 +80,7 @@ const getartworkimage = async (req, res, next) => {
   }
 };
 
-const getallartworks = async (req, res, next) => {
+const getAllArtworks = async (req, res, next) => {
   try {
     const artworks = await Artworks.find({});
     res.status(200).json(artworks);
@@ -89,7 +89,7 @@ const getallartworks = async (req, res, next) => {
   }
 };
 
-const getartworkartist = async (req, res, next) => {
+const getArtworkArtist = async (req, res, next) => {
   try {
     const artist = await Artist.findOne({ _id: req.query.id });
     if (!artist)
@@ -103,9 +103,9 @@ const getartworkartist = async (req, res, next) => {
 
 module.exports = {
   add,
-  checkduplicate,
-  getartistartworks,
-  getartworkimage,
-  getallartworks,
-  getartworkartist,
+  checkDuplicate,
+  getArtistArtworks,
+  getArtworkImage,
+  getAllArtworks,
+  getArtworkArtist,
 };

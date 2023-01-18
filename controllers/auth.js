@@ -5,6 +5,27 @@ const Artist = require("../models/Artist.js");
 const { createError } = require("../error.js");
 const jwt = require("jsonwebtoken");
 
+const signupAdmin = async (req, res, next) => {
+  try {
+    const checkbuyer = await User.findOne({
+      email: req.body.email,
+    });
+    if (checkbuyer) return next(createError(404, "Email already exists!"));
+
+    const checkartist = await Artist.findOne({ email: req.body.email });
+    if (checkartist)
+      return next(createError(404, "Email already exists For an Artist!"));
+
+    const newUser = new User({ isAdmin: true, ...req.body });
+
+    await newUser.save();
+    res.send({ status: 200, message: "Admin has been created!" });
+    // res.status(200).send("Admin has been created!");
+  } catch (err) {
+    next(err);
+  }
+};
+
 const signupUser = async (req, res, next) => {
   try {
     const checkbuyer = await User.findOne({ email: req.body.email });
@@ -219,6 +240,7 @@ module.exports = {
   checkDetailsUser,
   signinArtist,
   signinAdmin,
+  signupAdmin,
   googleAuthUser,
   googleAuthArtist,
   logout,
