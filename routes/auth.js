@@ -8,6 +8,7 @@ const {
   signinArtist,
   googleAuthArtist,
   signinAdmin,
+  signupAdmin,
   checkDetailsArtist,
   checkDetailsUser,
 } = require("../controllers/auth.js");
@@ -34,6 +35,9 @@ router.post("/artist/google", googleAuthArtist);
 
 //Signin Admin
 router.post("/admin/signin", signinAdmin);
+
+//Signup Admin
+router.post("/admin/signup", signupAdmin);
 
 //Logout
 router.get("/logout", logout);
