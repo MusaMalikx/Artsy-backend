@@ -11,6 +11,9 @@ const {
   signupAdmin,
   checkDetailsArtist,
   checkDetailsUser,
+  checkDetailsAdmin,
+  googleSignupAdmin,
+  googleSigninAdmin,
 } = require("../controllers/auth.js");
 
 const router = express.Router();
@@ -39,6 +42,12 @@ router.post("/admin/signin", signinAdmin);
 //Signup Admin
 router.post("/admin/signup", signupAdmin);
 
+//Signup Admin using Google
+router.post("/admin/google/signup", googleSignupAdmin);
+
+//SignIn Admin using Google
+router.post("/admin/google/signin", googleSigninAdmin);
+
 //Logout
 router.get("/logout", logout);
 
@@ -47,5 +56,8 @@ router.post("/artist/check", checkDetailsArtist);
 
 //Check number and cnic for User
 router.post("/user/check", checkDetailsUser);
+
+//Check number , cnic and admin code for admin
+router.post("/admin/check", checkDetailsAdmin);
 
 module.exports = router;
