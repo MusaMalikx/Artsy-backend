@@ -19,7 +19,7 @@ const signupUser = async (req, res, next) => {
     await newUser.save();
     res.status(200).send("User has been created!");
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -37,7 +37,7 @@ const signinUser = async (req, res, next) => {
 
     res.status(200).json(object);
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -55,7 +55,7 @@ const signupArtist = async (req, res, next) => {
     await newArtist.save();
     res.status(200).send("Artist has been created!");
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -72,7 +72,7 @@ const checkDetailsArtist = async (req, res, next) => {
     if (!artistcnic && !artistnum)
       return res.send({ status: 200, message: "Details Ok" });
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -87,7 +87,7 @@ const checkDetailsUser = async (req, res, next) => {
     if (!usercnic && !usernum)
       return res.send({ status: 200, message: "Details Ok" });
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -105,7 +105,7 @@ const signinArtist = async (req, res, next) => {
 
     res.status(200).json(object);
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -123,7 +123,7 @@ const signinAdmin = async (req, res, next) => {
 
     res.status(200).json(object);
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -160,7 +160,7 @@ const googleAuthUser = async (req, res, next) => {
       res.status(200).json(object);
     }
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -195,7 +195,7 @@ const googleAuthArtist = async (req, res, next) => {
       res.status(200).json(object);
     }
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 

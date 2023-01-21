@@ -7,6 +7,7 @@ const {
   getartworkimage,
   getallartworks,
   getartworkartist,
+  getBidInfo
 } = require("../controllers/artwork.js");
 const { upload } = require("../utils/artworksUpload.js");
 const router = express.Router();
@@ -28,5 +29,8 @@ router.get("/all", getallartworks);
 
 //Get artwork Artist name
 router.get("/madeby", getartworkartist);
+
+//Get highest bid information
+router.get("/bidinfo/:artId",verifyToken, getBidInfo);
 
 module.exports = router;
