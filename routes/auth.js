@@ -10,7 +10,7 @@ const {
   signinAdmin,
   checkDetailsArtist,
   checkDetailsUser,
-} = require("../controllers/auth.js");
+} = require("../controllers/auth");
 
 const router = express.Router();
 

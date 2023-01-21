@@ -1,6 +1,6 @@
-const { createError } = require("../error.js");
-const Artworks = require("../models/Artwork.js");
-const Artist = require("../models/Artist.js");
+const { createError } = require("../error");
+const Artworks = require("../models/Artwork");
+const Artist = require("../models/Artist");
 const fs = require("fs");
 const mime = require("mime");
 

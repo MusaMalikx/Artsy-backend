@@ -5,9 +5,9 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var dotenv = require("dotenv");
 var cors = require("cors");
-const userRoutes = require("./routes/users.js");
-const authRoutes = require("./routes/auth.js");
-const artworkRoutes = require("./routes/artworks.js");
+const userRoutes = require("./routes/users");
+const authRoutes = require("./routes/auth");
+const artworkRoutes = require("./routes/artworks");
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/'});
 

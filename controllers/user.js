@@ -1,4 +1,4 @@
-const { createError } = require("../error.js");
+const { createError } = require("../error");
 
 // import createError from "../error";
 // import User from "../models/Users";

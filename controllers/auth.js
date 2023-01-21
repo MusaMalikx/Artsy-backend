@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const User = require("../models/Users.js");
-const Artist = require("../models/Artist.js");
+const User = require("../models/Users");
+const Artist = require("../models/Artist");
 // import bcrypt from "bcryptjs";
-const { createError } = require("../error.js");
+const { createError } = require("../error");
 const jwt = require("jsonwebtoken");
 
 const signupUser = async (req, res, next) => {

@@ -1,5 +1,5 @@
 const express = require("express");
-const { verifyToken } = require("../utils/verifyToken.js");
+const { verifyToken } = require("../utils/verifyToken");
 const {
   add,
   checkduplicate,
