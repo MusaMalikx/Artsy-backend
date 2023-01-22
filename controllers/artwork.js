@@ -54,10 +54,9 @@ const checkduplicate = async (req, res, next) => {
 
 const getartistartworks = async (req, res, next) => {
   try {
-    const artist = await Artist.findOne({ _id: req.user.id });
+    const artist = await Artist.findOne({ _id: req.params.artistId });
     if (!artist) return next(createError(404, "Artist Not logged in!"));
-
-    const artworks = await Artworks.find({ artistId: req.user.id });
+    const artworks = await Artworks.find({ artistId: req.params.artistId });
     res.status(200).json(artworks);
   } catch (err) {
     next(createError(500, "Server Error"));
