@@ -3,8 +3,11 @@ const { createError } = require("../error");
 // import createError from "../error";
 // import User from "../models/Users";
 
-const User = require("../models/Users.js");
-const Artworks = require("../models/Artwork.js");
+const User = require("../models/Users");
+const Artworks = require("../models/Artwork");
+const WalletBuyer = require("../models/WalletBuyer");
+const Artist = require("../models/Artist");
+const WalletArtist = require("../models/WalletArtist");
 const update = async (req, res, next) => {
   if (req.params.id === req.user.id) {
     try {
@@ -278,4 +281,138 @@ const autoBid = async (req, res, next) => {
   }
 };
 
-module.exports = { update, getUser, placeBid, autoBid };
+//Add amount in the wallet
+const addWallet = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "Buyer not logged in! "));
+    const oldWallet = await WalletBuyer.findOne({
+      buyerId: req.user.id,
+    });
+    if (oldWallet) {
+      await oldWallet.updateOne({
+        $set: {
+          ...oldWallet._doc,
+          Amount: parseFloat(req.body.Amount) + oldWallet.Amount,
+        },
+      });
+      res.status(200).json("Amount added successfully");
+    } else {
+      const newWallet = new WalletBuyer({
+        Amount: parseFloat(req.body.Amount),
+        buyerId: req.user.id,
+        Transactions: [],
+      });
+      await newWallet.save();
+      res.status(200).json("Amount added successfully");
+    }
+  } catch (error) {
+    return next(createError(500, "Server Error!"));
+  }
+};
+
+//perform a transaction to send amount to artist
+
+const sendAmount = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "User not logged in!"));
+    const artist = await Artist.findOne({ _id: req.params.artistId });
+    if (!artist) return next(createError(404, "Artist does not exist!"));
+    const wallet = await WalletBuyer.findOne({
+      buyerId: req.user.id,
+    });
+    if (wallet) {
+      if (parseFloat(wallet.Amount) >= parseFloat(req.body.Amount)) {
+        //Updating buyer wallet
+        await wallet.updateOne({
+          $set: {
+            ...wallet._doc,
+            Amount: parseFloat(wallet.Amount) - parseFloat(req.body.Amount),
+            Transactions: [
+              ...wallet.Transactions,
+              {
+                sent: true, //sender
+                userName: artist.name,
+                Amount: parseFloat(req.body.Amount),
+              },
+            ],
+          },
+        });
+        //Updating artist wallet
+        const artistWallet = await WalletArtist.findOne({
+          artistId: req.params.artistId,
+        });
+        if (artistWallet) {
+          //Updating artist wallet
+          await artistWallet.updateOne({
+            $set: {
+              ...artistWallet._doc,
+              Amount:
+                parseFloat(artistWallet.Amount) + parseFloat(req.body.Amount),
+              Transactions: [
+                ...artistWallet.Transactions,
+                {
+                  sent: false, //receiver
+                  userName: buyer.name,
+                  Amount: parseFloat(req.body.Amount),
+                },
+              ],
+            },
+          });
+        } //create a wallet for artist
+        else {
+          const newArtistWallet = new WalletArtist({
+            Amount: parseFloat(req.body.Amount),
+            artistId: req.params.artistId,
+            Transactions: [
+              {
+                sent: false, //receiver
+                userName: buyer.name,
+                Amount: parseFloat(req.body.Amount),
+              },
+            ],
+          });
+          await newArtistWallet.save();
+        }
+        res.status(200).json("Successfully sent the amount!");
+      } else return next(createError(402, "Insufficient amount in wallet"));
+    } else return next(createError(403, "Wallet does exist!"));
+  } catch (error) {
+    return next(createError(500, "Server Error!"));
+  }
+};
+
+//Get info of the buyer's wallet
+const getWalletInfo = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "User not logged in!"));
+    const wallet = await WalletBuyer.findOne({
+      buyerId: req.user.id,
+    });
+    if (!wallet) {
+      res.status(200).json({
+        Amount: 0,
+        Transactions: [],
+      });
+    } else {
+      res.status(200).json({
+        Amount: wallet.Amount,
+        Transactions: wallet.Transactions,
+      });
+    }
+  } catch (error) {
+    return next(createError(500, "Server Error!"));
+  }
+};
+
+module.exports = {
+  update,
+  getUser,
+  placeBid,
+  autoBid,
+  addWallet,
+  sendAmount,
+  getWalletInfo,
+};

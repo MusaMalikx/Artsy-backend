@@ -5,7 +5,10 @@ const {
   getUser,
   placeBid,
   autoBid,
-} = require("../controllers/user.js");
+  addWallet,
+  sendAmount,
+  getWalletInfo,
+} = require("../controllers/user");
 
 const router = express.Router();
 
@@ -20,5 +23,14 @@ router.post("/bid/:artId", verifyToken, placeBid);
 
 //Initalize an automated bid on an Artwork
 router.post("/autobid/:artId", verifyToken, autoBid);
+
+//Add amount in the wallet
+router.post("/wallet/add", verifyToken, addWallet);
+
+//Perform a transaction to send amount to artist
+router.post("/wallet/send/:artistId", verifyToken, sendAmount);
+
+//Get details of the buyer's wallet
+router.get("/wallet", verifyToken, getWalletInfo);
 
 module.exports = router;
