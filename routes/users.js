@@ -33,4 +33,5 @@ router.post("/wallet/send/:artistId", verifyToken, sendAmount);
 //Get details of the buyer's wallet
 router.get("/wallet", verifyToken, getWalletInfo);
 
+
 module.exports = router;
