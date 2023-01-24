@@ -102,19 +102,36 @@ const bidProposal = async (req, res, next) => {
   }
 };
 
+//Get all the new buyers proposal where artist has not placed a bid
 
-//Get all the buyers proposal
+const newProposals = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({ _id: req.user.id });
+    if (!artist) return next(createError(404, "Artist not logged in"));
+    const buyerProposal = await BuyerProposal.find();
+    if (!buyerProposal) return next(createError(403, "Proposals not found!"));
+    const newProposals = buyerProposal.map((proposal) => {
+      let flag = false;
+      proposal.artistProposals.forEach((artistBid) => {
+        if (artistBid.artistId === req.user.id) {
+          flag = true;
+          return;
+        }
+      });
+      if (flag) return null;
+      return proposal;
+    });
 
-const newProposals = async (req,res,next)=>{
-
-}
-
-
+    res.status(200).json(newProposals.filter((prop) => prop != null));
+  } catch (err) {
+    return next(createError(500, "Server Error"));
+  }
+};
 
 module.exports = {
   getWalletInfo,
   addWallet,
   getArtist,
   bidProposal,
-  newProposals
+  newProposals,
 };
