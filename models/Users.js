@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema(
     firebaseid: {
       type: String,
       required: true,
+      unique: true,
     },
     email: {
       type: String,
