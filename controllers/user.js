@@ -444,6 +444,21 @@ const getBidList = async (req, res, next) => {
   }
 };
 
+
+//Create a new on demand proposal for buyer
+
+const createNewProposal = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({
+      _id: req.users.id
+    })
+    if (!buyer) return next(createError(404, "User not logged in"));
+  } catch (error) {
+    return next(createError(500, "Server Error"))
+  }
+
+}
+
 module.exports = {
   update,
   getUser,
@@ -453,4 +468,5 @@ module.exports = {
   sendAmount,
   getWalletInfo,
   getBidList,
+  createNewProposal
 };

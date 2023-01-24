@@ -9,6 +9,7 @@ const {
   sendAmount,
   getWalletInfo,
   getBidList,
+  createNewProposal
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -36,6 +37,9 @@ router.get("/wallet", verifyToken, getWalletInfo);
 
 //Get list of all artworks on which the buyer has placed the bid
 router.get("/bid/list/:buyerId", getBidList);
+
+//Create a new on demand proposal for buyer
+router.post("/proposal/create", createNewProposal);
 
 
 module.exports = router;
