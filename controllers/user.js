@@ -418,25 +418,24 @@ const getBidList = async (req, res, next) => {
     if (!buyer) return next(createError(404, "Buyer not found!"));
     const artworks = await Artworks.find();
     if (artworks.length > 0) {
-      res.status(200).json(
-        artworks.map((art) => {
-          let flag = false;
-          let myBid = {};
-          art.bidderList.forEach((bid) => {
-            if (bid.bidderId === req.params.buyerId) {
-              flag = true;
-              myBid = bid;
-              return;
-            }
-          });
-          const { bidderList, ...remaining } = art._doc;
-          if (flag)
-            return {
-              ...remaining,
-              myBid,
-            };
-        })
-      );
+      const bidList = artworks.map((art) => {
+        let flag = false;
+        let myBid = {};
+        art.bidderList.forEach((bid) => {
+          if (bid.bidderId === req.params.buyerId) {
+            flag = true;
+            myBid = bid;
+            return;
+          }
+        });
+        const { bidderList, ...remaining } = art._doc;
+        if (flag)
+          return {
+            ...remaining,
+            myBid,
+          };
+      });
+      res.status(200).json(bidList.filter((e) => e != null));
     } else {
       return next(createError(403, "Not artwork found!"));
     }
