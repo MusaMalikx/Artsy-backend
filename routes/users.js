@@ -1,7 +1,6 @@
 const express = require("express");
-const { verifyToken } = require("../utils/verifyToken.js");
-const { update } = require("../controllers/user.js");
-const { getUser } = require("../controllers/user.js");
+const { verifyToken } = require("../utils/verifyToken");
+const { update, getUser, getAllUser } = require("../controllers/user");
 
 const router = express.Router();
 
@@ -10,5 +9,8 @@ router.put("/update/:id", verifyToken, update);
 
 //get a user
 router.get("/find/:id", getUser);
+
+//get all user
+router.get("/", getAllUser);
 
 module.exports = router;

@@ -247,6 +247,7 @@ const googleSignupAdmin = async (req, res, next) => {
 const googleAuthUser = async (req, res, next) => {
   try {
     const user = await User.findOne({ isAdmin: false, email: req.body.email });
+    // const user = await User.findOne({ email: req.body.email });
     if (user) {
       const token = jwt.sign({ id: user._id }, process.env.JWT);
       const object = {

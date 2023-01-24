@@ -8,8 +8,10 @@ var cors = require("cors");
 const userRoutes = require("./routes/users.js");
 const authRoutes = require("./routes/auth.js");
 const artworkRoutes = require("./routes/artworks.js");
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/'});
+const conversationRoutes = require("./routes/conversations");
+const messageRoutes = require("./routes/messages");
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
@@ -31,6 +33,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/artworks", artworkRoutes);
+app.use("/api/conversations", conversationRoutes);
+app.use("/api/messages", messageRoutes);
 
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
