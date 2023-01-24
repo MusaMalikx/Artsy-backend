@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const User = require("../models/Users.js");
-const Artist = require("../models/Artist.js");
+const User = require("../models/Users");
+const Artist = require("../models/Artist");
 // import bcrypt from "bcryptjs";
-const { createError } = require("../error.js");
+const { createError } = require("../error");
 const jwt = require("jsonwebtoken");
 
 const signupAdmin = async (req, res, next) => {
@@ -39,7 +39,7 @@ const signupUser = async (req, res, next) => {
     await newUser.save();
     res.status(200).send("User has been created!");
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -57,7 +57,7 @@ const signinUser = async (req, res, next) => {
 
     res.status(200).json(object);
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -75,7 +75,7 @@ const signupArtist = async (req, res, next) => {
     await newArtist.save();
     res.status(200).send("Artist has been created!");
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -92,7 +92,7 @@ const checkDetailsArtist = async (req, res, next) => {
     if (!artistcnic && !artistnum)
       return res.send({ status: 200, message: "Details Ok" });
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -107,7 +107,7 @@ const checkDetailsUser = async (req, res, next) => {
     if (!usercnic && !usernum)
       return res.send({ status: 200, message: "Details Ok" });
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -159,7 +159,7 @@ const signinArtist = async (req, res, next) => {
 
     res.status(200).json(object);
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -177,7 +177,7 @@ const signinAdmin = async (req, res, next) => {
 
     res.status(200).json(object);
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -284,7 +284,7 @@ const googleAuthUser = async (req, res, next) => {
       res.status(200).json(object);
     }
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -319,7 +319,7 @@ const googleAuthArtist = async (req, res, next) => {
       res.status(200).json(object);
     }
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 

@@ -1,5 +1,5 @@
 const express = require("express");
-const { verifyToken } = require("../utils/verifyToken.js");
+const { verifyToken } = require("../utils/verifyToken");
 const {
   add,
   checkDuplicate,
@@ -7,6 +7,7 @@ const {
   getArtworkImage,
   getAllArtworks,
   getArtworkArtist,
+  getBidInfo,
 } = require("../controllers/artwork.js");
 const { upload } = require("../utils/artworksUpload.js");
 const router = express.Router();
@@ -18,7 +19,7 @@ router.post("/add", verifyToken, upload.array("productImage", 3), add);
 router.post("/check", verifyToken, checkDuplicate);
 
 //Get Artworks Artist
-router.get("/artist", verifyToken, getArtistArtworks);
+router.get("/artist/:artistId", getArtistArtworks);
 
 //Get Artwork Image
 router.get("/image", getArtworkImage);
@@ -28,5 +29,8 @@ router.get("/all", getAllArtworks);
 
 //Get artwork Artist name
 router.get("/madeby", getArtworkArtist);
+
+//Get highest bid information
+router.get("/bidinfo/:artId", verifyToken, getBidInfo);
 
 module.exports = router;

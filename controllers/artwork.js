@@ -1,6 +1,6 @@
-const { createError } = require("../error.js");
-const Artworks = require("../models/Artwork.js");
-const Artist = require("../models/Artist.js");
+const { createError } = require("../error");
+const Artworks = require("../models/Artwork");
+const Artist = require("../models/Artist");
 const fs = require("fs");
 const mime = require("mime");
 
@@ -24,7 +24,7 @@ const add = async (req, res, next) => {
     //Now to get the image in get request we can make a new router.get("/uploads") where we find the url and return the image
     //Or we can make the uploads folder publically available so browser can access the images  in app.js write app.use('/uploads' , express.static('uploads'));
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -48,19 +48,18 @@ const checkDuplicate = async (req, res, next) => {
 
     if (!artwork && !artwork2) res.status(200).json({ message: "Okay" });
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
 const getArtistArtworks = async (req, res, next) => {
   try {
-    const artist = await Artist.findOne({ _id: req.user.id });
+    const artist = await Artist.findOne({ _id: req.params.artistId });
     if (!artist) return next(createError(404, "Artist Not logged in!"));
-
-    const artworks = await Artworks.find({ artistId: req.user.id });
+    const artworks = await Artworks.find({ artistId: req.params.artistId });
     res.status(200).json(artworks);
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -76,7 +75,7 @@ const getArtworkImage = async (req, res, next) => {
       res.send(data);
     });
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -85,7 +84,7 @@ const getAllArtworks = async (req, res, next) => {
     const artworks = await Artworks.find({});
     res.status(200).json(artworks);
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -97,7 +96,25 @@ const getArtworkArtist = async (req, res, next) => {
 
     res.status(200).json(artist.name);
   } catch (err) {
-    next(err);
+    next(createError(500, "Server Error"));
+  }
+};
+
+const getBidInfo = async (req, res, next) => {
+  try {
+    const artwork = await Artworks.findOne({ _id: req.params.artId });
+    if (!artwork) return next(createError(404, "Invalid Artwork"));
+    res.status(200).json({
+      currentBid: artwork.currentbid,
+      basePrice: artwork.baseprice,
+      currentBidder: artwork.currentbidder,
+      buyerInfo:
+        artwork.bidderList.filter((e) => e.bidderId == req.user.id).length >= 1
+          ? artwork.bidderList.filter((e) => e.bidderId == req.user.id)[0]
+          : {},
+    });
+  } catch (error) {
+    next(createError(500, "Server Error"));
   }
 };
 
@@ -108,4 +125,5 @@ module.exports = {
   getArtworkImage,
   getAllArtworks,
   getArtworkArtist,
+  getBidInfo,
 };
