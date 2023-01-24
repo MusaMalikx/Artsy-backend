@@ -8,6 +8,7 @@ const Artworks = require("../models/Artwork");
 const WalletBuyer = require("../models/WalletBuyer");
 const Artist = require("../models/Artist");
 const WalletArtist = require("../models/WalletArtist");
+const BuyerProposal = require("../models/BuyerProposal");
 const update = async (req, res, next) => {
   if (req.params.id === req.user.id) {
     try {
@@ -410,7 +411,6 @@ const getWalletInfo = async (req, res, next) => {
 //Get list of all artworks where buyer has placed the bid
 
 const getBidList = async (req, res, next) => {
-  console.log(req.params.buyerId);
   try {
     const buyer = await User.findOne({
       _id: req.params.buyerId,
@@ -444,20 +444,31 @@ const getBidList = async (req, res, next) => {
   }
 };
 
-
 //Create a new on demand proposal for buyer
 
 const createNewProposal = async (req, res, next) => {
   try {
     const buyer = await User.findOne({
-      _id: req.users.id
-    })
+      _id: req.user.id,
+    });
     if (!buyer) return next(createError(404, "User not logged in"));
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    let today = new Date().toLocaleDateString("en-US", options);
+    const newProposal = new BuyerProposal({
+      buyerId: req.user.id,
+      ...req.body,
+      dateCreated: today,
+    });
+    await newProposal.save();
+    res.status(200).json("New proposal created successfully!");
   } catch (error) {
-    return next(createError(500, "Server Error"))
+    return next(createError(500, "Server Error"));
   }
-
-}
+};
 
 module.exports = {
   update,
@@ -468,5 +479,5 @@ module.exports = {
   sendAmount,
   getWalletInfo,
   getBidList,
-  createNewProposal
+  createNewProposal,
 };

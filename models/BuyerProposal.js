@@ -14,7 +14,7 @@ const buyerProposal = new mongoose.Schema(
             required: true,
         },
         dateCreated: {
-            type: Date,
+            type: String,
             required: true,
         },
         expectedAmount: {
@@ -22,7 +22,7 @@ const buyerProposal = new mongoose.Schema(
             required: true,
         },
         artistProposals: {
-            type: [Objects]
+            type: [Object]
         }
     },
     { timestamps: false }

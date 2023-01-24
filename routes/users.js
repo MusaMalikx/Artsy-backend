@@ -9,7 +9,7 @@ const {
   sendAmount,
   getWalletInfo,
   getBidList,
-  createNewProposal
+  createNewProposal,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -39,7 +39,6 @@ router.get("/wallet", verifyToken, getWalletInfo);
 router.get("/bid/list/:buyerId", getBidList);
 
 //Create a new on demand proposal for buyer
-router.post("/proposal/create", createNewProposal);
-
+router.post("/proposal/create", verifyToken, createNewProposal);
 
 module.exports = router;
