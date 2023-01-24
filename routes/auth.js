@@ -11,14 +11,10 @@ const {
   signupAdmin,
   checkDetailsArtist,
   checkDetailsUser,
-<<<<<<< HEAD
-} = require("../controllers/auth");
-=======
   checkDetailsAdmin,
   googleSignupAdmin,
   googleSigninAdmin,
 } = require("../controllers/auth.js");
->>>>>>> dev
 
 const router = express.Router();
 

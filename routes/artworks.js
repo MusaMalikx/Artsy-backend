@@ -7,6 +7,7 @@ const {
   getArtworkImage,
   getAllArtworks,
   getArtworkArtist,
+  getBidInfo,
 } = require("../controllers/artwork.js");
 const { upload } = require("../utils/artworksUpload.js");
 const router = express.Router();
@@ -18,7 +19,7 @@ router.post("/add", verifyToken, upload.array("productImage", 3), add);
 router.post("/check", verifyToken, checkDuplicate);
 
 //Get Artworks Artist
-router.get("/artist/:artistId", getartistartworks);
+router.get("/artist/:artistId", getArtistArtworks);
 
 //Get Artwork Image
 router.get("/image", getArtworkImage);

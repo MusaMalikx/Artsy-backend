@@ -125,4 +125,5 @@ module.exports = {
   getArtworkImage,
   getAllArtworks,
   getArtworkArtist,
+  getBidInfo,
 };
