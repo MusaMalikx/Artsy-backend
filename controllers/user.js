@@ -407,6 +407,44 @@ const getWalletInfo = async (req, res, next) => {
   }
 };
 
+//Get list of all artworks where buyer has placed the bid
+
+const getBidList = async (req, res, next) => {
+  console.log(req.params.buyerId);
+  try {
+    const buyer = await User.findOne({
+      _id: req.params.buyerId,
+    });
+    if (!buyer) return next(createError(404, "Buyer not found!"));
+    const artworks = await Artworks.find();
+    if (artworks.length > 0) {
+      res.status(200).json(
+        artworks.map((art) => {
+          let flag = false;
+          let myBid = {};
+          art.bidderList.forEach((bid) => {
+            if (bid.bidderId === req.params.buyerId) {
+              flag = true;
+              myBid = bid;
+              return;
+            }
+          });
+          const { bidderList, ...remaining } = art._doc;
+          if (flag)
+            return {
+              ...remaining,
+              myBid,
+            };
+        })
+      );
+    } else {
+      return next(createError(403, "Not artwork found!"));
+    }
+  } catch (error) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   update,
   getUser,
@@ -415,4 +453,5 @@ module.exports = {
   addWallet,
   sendAmount,
   getWalletInfo,
+  getBidList,
 };

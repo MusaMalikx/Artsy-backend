@@ -8,6 +8,7 @@ const {
   addWallet,
   sendAmount,
   getWalletInfo,
+  getBidList,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -32,6 +33,9 @@ router.post("/wallet/send/:artistId", verifyToken, sendAmount);
 
 //Get details of the buyer's wallet
 router.get("/wallet", verifyToken, getWalletInfo);
+
+//Get list of all artworks on which the buyer has placed the bid
+router.get("/bid/list/:buyerId", getBidList);
 
 
 module.exports = router;
