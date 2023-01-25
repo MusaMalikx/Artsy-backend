@@ -39,31 +39,40 @@ const io = new Server(server, {
  */
 
 let users = [];
+let conversations = [];
 
 const getUser = (uid) => users.find((user) => user.uid === uid);
 
 const addToUser = (uid, sid) => {
-  !users.some((user) => user.uid === uid) && users.push({ uid, sid });
+  !users?.some((user) => user.uid === uid) && users.push({ uid, sid });
+};
+
+const getConversation = (cid) =>
+  conversations.find((conversation) => conversation.sid === cid);
+
+const addToConversation = (cid, sid, message) => {
+  !conversations?.some((conversation) => conversation.cid === cid) &&
+    conversations.push({ cid, sid, message });
 };
 
 const removeFromUser = (sid) => {
-  users = users.filter((user) => user.sid !== sid);
+  users = users?.filter((user) => user.sid !== sid);
 };
 
 io.on("connection", (socket) => {
-  console.log(`User Connected: ${socket.id}`);
+  // console.log(`User Connected: ${socket.id}`);
 
   //send and get message
   socket.on("sendMessage", ({ uid, rid, text }) => {
-    // console.log(uid, rid, text);
     const user = getUser(rid);
-    // console.log("users", users);
-    // console.log(user);
-    io.to(user.sid).emit("getMessage", {
+    io.to(user?.sid).emit("getMessage", {
       uid,
       text,
     });
   });
+
+  //send and get conversation
+
 
   // take user id  and socket id from user
   socket.on("sendUser", (uid) => {
@@ -72,7 +81,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("User Disconnected", socket.id);
+    // console.log("User Disconnected", socket.id);
     removeFromUser(socket.id);
     io.emit("getUsers", users);
   });

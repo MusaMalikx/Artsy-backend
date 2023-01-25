@@ -1,4 +1,5 @@
 const { createError } = require("../error.js");
+const Artist = require("../models/Artist.js");
 
 // import createError from "../error";
 // import User from "../models/Users";
@@ -42,4 +43,18 @@ const getAllUser = async (req, res, next) => {
   }
 };
 
-module.exports = { update, getUser, getAllUser };
+const checkUser = async (req, res, next) => {
+  try {
+    let user = await User.findById(req.params.id);
+    if (user) user = { ...user._doc, type: "buyer" };
+    if (!user) {
+      user = await Artist.findById(req.params.id);
+      user = { ...user._doc, type: "artist" };
+    }
+    return res.status(200).json(user);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { update, getUser, getAllUser, checkUser };
