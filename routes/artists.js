@@ -1,6 +1,12 @@
 const express = require("express");
 const { verifyToken } = require("../utils/verifyToken");
-const { getWalletInfo,addWallet,getArtist,bidProposal,newProposals } = require("../controllers/artist");
+const {
+  getWalletInfo,
+  addWallet,
+  getArtist,
+  bidProposal,
+  newProposals,
+} = require("../controllers/artist");
 
 const router = express.Router();
 

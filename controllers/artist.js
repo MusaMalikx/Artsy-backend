@@ -1,6 +1,7 @@
 const { createError } = require("../error");
 const Artist = require("../models/Artist");
 const BuyerProposal = require("../models/BuyerProposal");
+const Users = require("../models/Users");
 const WalletArtist = require("../models/WalletArtist");
 
 //Add amount in the wallet
@@ -67,7 +68,7 @@ const getArtist = async (req, res, next) => {
   }
 };
 
-//Place bid on buyer prosal
+//Place bid on buyer proposal
 
 const bidProposal = async (req, res, next) => {
   try {
@@ -91,6 +92,8 @@ const bidProposal = async (req, res, next) => {
           {
             artistId: req.user.id,
             bidDate: today,
+            artistImage: artist.imageURL,
+            artistName: artist.name,
             ...req.body,
           },
         ],
@@ -127,7 +130,6 @@ const newProposals = async (req, res, next) => {
     return next(createError(500, "Server Error"));
   }
 };
-
 module.exports = {
   getWalletInfo,
   addWallet,

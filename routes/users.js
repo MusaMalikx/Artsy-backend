@@ -10,6 +10,13 @@ const {
   getWalletInfo,
   getBidList,
   createNewProposal,
+  getProposals,
+  deleteProposals,
+  getArtistProposalBids,
+  acceptProposal,
+  releaseCentralPayment,
+  getAcceptedProposalList,
+  deleteAcceptedProposal,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -40,5 +47,26 @@ router.get("/bid/list/:buyerId", getBidList);
 
 //Create a new on demand proposal for buyer
 router.post("/proposal/create", verifyToken, createNewProposal);
+
+//Get all the created proposals
+router.get("/proposal", verifyToken, getProposals);
+
+//Delete previously created proposals
+router.post("/proposal/delete", verifyToken, deleteProposals);
+
+//Get all the proposal bids by artists on the buyer proposal
+router.get("/proposal/artistbid/:proposalId", getArtistProposalBids);
+
+//Accept a artist proposal for a on-demand artwork
+router.post("/proposal/accept/:proposalId", verifyToken, acceptProposal);
+
+//Release Central Payment
+router.get("/payment/release/:proposalId", verifyToken, releaseCentralPayment);
+
+//Get Accepted Proposal List
+router.get("/proposal/accepted", verifyToken, getAcceptedProposalList);
+
+//Get Accepted Proposal List
+router.post(`/proposal/accepted/delete`, verifyToken, deleteAcceptedProposal);
 
 module.exports = router;
