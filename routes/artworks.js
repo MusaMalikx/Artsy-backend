@@ -6,8 +6,10 @@ const {
   getArtistArtworks,
   getArtworkImage,
   getAllArtworks,
+  getAllArtworksByCategory,
   getArtworkArtist,
   getBidInfo,
+  getSearchedArtwork,
 } = require("../controllers/artwork.js");
 const { upload } = require("../utils/artworksUpload.js");
 const router = express.Router();
@@ -26,6 +28,12 @@ router.get("/image", getArtworkImage);
 
 //Get All artworks
 router.get("/all", getAllArtworks);
+
+//Get All artworks Filter by category
+router.get("/all/category", getAllArtworksByCategory);
+
+//Search Artwork
+router.get("/search", getSearchedArtwork);
 
 //Get artwork Artist name
 router.get("/madeby", getArtworkArtist);
