@@ -17,6 +17,7 @@ const {
   releaseCentralPayment,
   getAcceptedProposalList,
   deleteAcceptedProposal,
+  getAllUsers,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -26,6 +27,9 @@ router.put("/update/:id", verifyToken, update);
 
 //get a user
 router.get("/find/:id", getUser);
+
+//get all user
+router.get("/", getAllUsers);
 
 //Place a bid on an Artwork
 router.post("/bid/:artId", verifyToken, placeBid);

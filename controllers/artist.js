@@ -68,6 +68,16 @@ const getArtist = async (req, res, next) => {
   }
 };
 
+//Get all artist
+const getAllArtists = async (req, res, next) => {
+  try {
+    const artists = await Artist.find({});
+    res.status(200).json(artists);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 //Place bid on buyer proposal
 
 const bidProposal = async (req, res, next) => {
@@ -134,6 +144,7 @@ module.exports = {
   getWalletInfo,
   addWallet,
   getArtist,
+  getAllArtists,
   bidProposal,
   newProposals,
 };
