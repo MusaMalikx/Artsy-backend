@@ -1,11 +1,15 @@
 const express = require("express");
 const { verifyToken } = require("../utils/verifyToken");
-const { getWalletInfo,addWallet,getArtist,bidProposal,newProposals } = require("../controllers/artist");
+const { getWalletInfo,addWallet,getArtist,bidProposal,newProposals, getAllArtists } = require("../controllers/artist");
 
 const router = express.Router();
 
 //get an artist
 router.get("/find/:id", getArtist);
+
+//get all artists
+router.get("/", getAllArtists);
+
 //Add amount in the wallet
 router.post("/wallet/add", verifyToken, addWallet);
 
