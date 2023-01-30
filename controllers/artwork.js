@@ -92,6 +92,54 @@ const getAllArtworks = async (req, res, next) => {
   }
 };
 
+const getAllArtworksByCategory = async (req, res, next) => {
+  try {
+    let { category } = req.query;
+    const artworks = await Artworks.find({ category: category });
+    if (artworks) res.status(200).json(artworks);
+    else return next(createError(404, "Category Not Found"));
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
+const getSearchedArtwork = async (req, res, next) => {
+  try {
+    const keyword = req.query.keyword;
+    //Seprates out the string with spaces and treates each word as seprate and searches artwork
+    const cleanedKeyword = keyword.replace(/\s+/g, " ");
+    const keywordsArray = cleanedKeyword
+      .trim()
+      .split(" ")
+      .filter((word) => word !== "");
+    if (!keywordsArray.length)
+      return next(createError(404, "Please provide non empty search"));
+
+    const searchQuery = {
+      $or: keywordsArray.map((word) => ({
+        $or: [
+          { title: new RegExp(word, "i") },
+          { description: new RegExp(word, "i") },
+        ],
+      })),
+    };
+    const artworks = await Artworks.find(searchQuery);
+
+    //Does not seprate out keywords and searches the exact String
+    // const artworks = await Artworks.find({
+    //   $or: [
+    //     { title: { $regex: keyword, $options: "i" } },
+    //     { description: { $regex: keyword, $options: "i" } },
+    //   ],
+    // });
+
+    if (artworks.length !== 0) res.status(200).json(artworks);
+    else return next(createError(404, "No Artwork Found"));
+  } catch (err) {
+    next(createError(500, err));
+  }
+};
+
 const getArtworkArtist = async (req, res, next) => {
   try {
     const artist = await Artist.findOne({ _id: req.query.id });
@@ -128,6 +176,8 @@ module.exports = {
   getArtistArtworks,
   getArtworkImage,
   getAllArtworks,
+  getSearchedArtwork,
+  getAllArtworksByCategory,
   getArtworkArtist,
   getBidInfo,
 };
