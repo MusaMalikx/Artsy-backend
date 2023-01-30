@@ -9,6 +9,9 @@ const WalletBuyer = require("../models/WalletBuyer");
 const Artist = require("../models/Artist");
 const WalletArtist = require("../models/WalletArtist");
 const BuyerProposal = require("../models/BuyerProposal");
+const AcceptedProposal = require("../models/AcceptedProposal");
+const CentralBank = require("../models/CentralBank");
+
 const update = async (req, res, next) => {
   if (req.params.id === req.user.id) {
     try {
@@ -32,6 +35,15 @@ const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     res.status(200).json(user);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({});
+    res.status(200).json(users);
   } catch (err) {
     next(createError(500, "Server Error"));
   }
@@ -459,7 +471,11 @@ const createNewProposal = async (req, res, next) => {
     };
     let today = new Date().toLocaleDateString("en-US", options);
     const newProposal = new BuyerProposal({
-      buyerId: req.user.id,
+      buyerInfo: {
+        buyerId: req.user.id,
+        name: buyer.name,
+        image: buyer.imageURL,
+      },
       ...req.body,
       dateCreated: today,
     });
@@ -470,9 +486,227 @@ const createNewProposal = async (req, res, next) => {
   }
 };
 
+//Get all the proposals created by a buyer
+const getProposals = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "Buyer not logged in"));
+    const buyerProposal = await BuyerProposal.find();
+    if (!buyerProposal) return next(createError(403, "Proposals not found!"));
+    res
+      .status(200)
+      .json(
+        buyerProposal.filter((prop) => prop.buyerInfo.buyerId === req.user.id)
+      );
+  } catch (err) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
+//Delete previously created proposals
+const deleteProposals = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "Buyer not logged in"));
+    const proposalList = req.body.proposalList;
+    proposalList.forEach(async (pId) => {
+      await BuyerProposal.deleteOne({ _id: pId });
+    });
+    res.status(200).json("Successfully deleted!");
+  } catch (err) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
+//Get all the proposal bids by artists on the buyer proposal
+const getArtistProposalBids = async (req, res, next) => {
+  try {
+    console.log(req.params.proposalId);
+    const proposal = await BuyerProposal.findOne({
+      _id: req.params.proposalId,
+    });
+    if (!proposal) return next(createError(404, "Proposal not found!"));
+    res.status(200).json(proposal.artistProposals);
+  } catch (err) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
+//Accept a artist proposal for a on-demand artwork
+const acceptProposal = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "Buyer not logged in"));
+    const proposal = await BuyerProposal.findOne({
+      _id: req.params.proposalId,
+    });
+    if (!proposal) return next(createError(403, "Proposal not found!"));
+    const wallet = await WalletBuyer.findOne({
+      buyerId: req.user.id,
+    });
+    if (!wallet) return next(createError(402, "Not Enough credits in wallet!"));
+    if (wallet.Amount < parseFloat(req.body.acceptedAmount))
+      return next(createError(402, "Not Enough credits in wallet!"));
+    const info = {
+      buyerId: req.user.id,
+      proposalId: req.params.proposalId,
+      title: proposal.title,
+      dateCreated: proposal.dateCreated,
+      ...req.body,
+    };
+    const acceptProposal = new AcceptedProposal(info);
+    const savedProposal = await acceptProposal.save();
+    if (savedProposal) {
+      const bankInfo = {
+        sender: {
+          type: "Buyer",
+          _id: req.user.id,
+        },
+        proposalId: req.params.proposalId,
+        amount: parseFloat(req.body.acceptedAmount),
+        receiver: {
+          type: "Artist",
+          _id: req.body.artistInfo.artistId,
+        },
+      };
+      const centralStoreBank = new CentralBank(bankInfo);
+      const savedBankInfo = await centralStoreBank.save();
+      if (savedBankInfo) {
+        const updastedWallet = await wallet.updateOne({
+          $set: {
+            Amount: wallet.Amount - parseFloat(req.body.acceptedAmount),
+          },
+        });
+        if (updastedWallet.modifiedCount > 0) {
+          await proposal.deleteOne();
+          res.status(200).json("Succesfully accepted the wallet");
+        }
+      }
+    }
+  } catch (error) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
+//Release Central Payment
+const releaseCentralPayment = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({
+      _id: req.user.id,
+    });
+    if (!buyer) return next(createError(404, "User not logged in"));
+    const payment = await CentralBank.findOne({
+      proposalId: req.params.proposalId,
+    });
+    if (!payment) return next(createError(403, "Invalid Proposal!"));
+    const acceptedProposal = await AcceptedProposal.findOne({
+      proposalId: req.params.proposalId,
+    });
+    if (!acceptedProposal) return next(createError(403, "Invalid Proposal!"));
+    if (payment.sender._id !== req.user.id)
+      return next(createError(402, "Unauthorized to release payment!"));
+    const artist = await Artist.findOne({
+      _id: payment.receiver._id,
+    });
+    if (!artist) return next(createError(403, "Invalid Receiver!"));
+    const wallet = await WalletBuyer.findOne({ buyerId: req.user.id });
+    if (wallet) {
+      //Updating buyer wallet
+      await wallet.updateOne({
+        $set: {
+          ...wallet._doc,
+          Transactions: [
+            ...wallet.Transactions,
+            {
+              sent: true, //sender
+              userName: artist.name,
+              Amount: parseFloat(payment.amount),
+            },
+          ],
+        },
+      });
+      //Updating artist wallet
+      const artistWallet = await WalletArtist.findOne({
+        artistId: artist._id,
+      });
+      if (artistWallet) {
+        //Updating artist wallet
+        await artistWallet.updateOne({
+          $set: {
+            ...artistWallet._doc,
+            Amount:
+              parseFloat(artistWallet.Amount) + parseFloat(payment.amount),
+            Transactions: [
+              ...artistWallet.Transactions,
+              {
+                sent: false, //receiver
+                userName: buyer.name,
+                Amount: parseFloat(payment.amount),
+              },
+            ],
+          },
+        });
+      } //create a wallet for artist
+      else {
+        const newArtistWallet = new WalletArtist({
+          Amount: parseFloat(payment.amount),
+          artistId: artist._id,
+          Transactions: [
+            {
+              sent: false, //receiver
+              userName: buyer.name,
+              Amount: parseFloat(payment.amount),
+            },
+          ],
+        });
+        await newArtistWallet.save();
+      }
+      await payment.deleteOne();
+      await acceptedProposal.updateOne({
+        paid: true,
+      });
+      res.status(200).json("Successfully sent the amount!");
+    } else return next(createError(403, "Wallet does exist!"));
+  } catch (error) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
+//Get Accepted Proposal List
+const getAcceptedProposalList = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "Buyer not logged in"));
+    const acceptedProposals = await AcceptedProposal.find({
+      buyerId: req.user.id,
+    });
+    if (!acceptedProposals)
+      return next(createError(403, "Proposals not found!"));
+    res.status(200).json(acceptedProposals);
+  } catch (err) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
+//Get Accepted Proposal List
+const deleteAcceptedProposal = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "Buyer not logged in"));
+    const proposalList = req.body.proposalList;
+    proposalList.forEach(async (pId) => {
+      await AcceptedProposal.deleteOne({ _id: pId });
+    });
+    res.status(200).json("Successfully deleted!");
+  } catch (err) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   update,
   getUser,
+  getAllUsers,
   placeBid,
   autoBid,
   addWallet,
@@ -480,4 +714,11 @@ module.exports = {
   getWalletInfo,
   getBidList,
   createNewProposal,
+  getProposals,
+  deleteProposals,
+  getArtistProposalBids,
+  acceptProposal,
+  releaseCentralPayment,
+  getAcceptedProposalList,
+  deleteAcceptedProposal,
 };

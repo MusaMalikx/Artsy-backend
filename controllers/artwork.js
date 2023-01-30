@@ -57,7 +57,11 @@ const getArtistArtworks = async (req, res, next) => {
     const artist = await Artist.findOne({ _id: req.params.artistId });
     if (!artist) return next(createError(404, "Artist Not logged in!"));
     const artworks = await Artworks.find({ artistId: req.params.artistId });
-    res.status(200).json(artworks);
+    res.status(200).json({
+      artworks: artworks,
+      name: artist.name,
+      imageURL: artist.imageURL,
+    });
   } catch (err) {
     next(createError(500, "Server Error"));
   }

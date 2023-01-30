@@ -20,7 +20,7 @@ router.post("/add", verifyToken, upload.array("productImage", 3), add);
 //Check Details
 router.post("/check", verifyToken, checkDuplicate);
 
-//Get Artworks Artist
+//Get Artworks Artist with name and profile image
 router.get("/artist/:artistId", getArtistArtworks);
 
 //Get Artwork Image
