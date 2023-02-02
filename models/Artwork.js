@@ -30,6 +30,9 @@ const ArtworkSchema = new mongoose.Schema({
   images: {
     type: [String],
   },
+  status: {
+    type: String,
+  },
   currentbid: {
     type: Number,
     default: 0,
@@ -37,9 +40,9 @@ const ArtworkSchema = new mongoose.Schema({
   currentbidder: {
     type: String,
   },
-  bidderList : {
-    type : Array,
-  }
+  bidderList: {
+    type: Array,
+  },
 });
 
 module.exports = mongoose.model("Artworks", ArtworkSchema);

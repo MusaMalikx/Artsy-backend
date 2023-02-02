@@ -3,6 +3,7 @@ const Artworks = require("../models/Artwork");
 const Artist = require("../models/Artist");
 const fs = require("fs");
 const mime = require("mime");
+const { verifyStatus, verifyDates } = require("../utils/verifyStatus");
 
 const add = async (req, res, next) => {
   try {
@@ -13,9 +14,14 @@ const add = async (req, res, next) => {
     const files = req.files;
     const paths = files.map((file) => file.path); //All paths of images
 
+    // const msg = verifyDates(req.body.startdate, req.body.enddate);
+    // if (msg !== "correct") return next(createError(403, msg));
+
+    const status = verifyStatus(req.body.startdate, req.body.enddate);
     const newartwork = new Artworks({
       artistId: req.user.id,
       images: paths,
+      status: status,
       ...req.body,
     });
     const savedArtwork = await newartwork.save();
@@ -85,7 +91,7 @@ const getArtworkImage = async (req, res, next) => {
 
 const getAllArtworks = async (req, res, next) => {
   try {
-    const artworks = await Artworks.find({});
+    const artworks = await Artworks.find({ status: "live" });
     res.status(200).json(artworks);
   } catch (err) {
     next(createError(500, "Server Error"));
@@ -95,7 +101,10 @@ const getAllArtworks = async (req, res, next) => {
 const getAllArtworksByCategory = async (req, res, next) => {
   try {
     let { category } = req.query;
-    const artworks = await Artworks.find({ category: category });
+    const artworks = await Artworks.find({
+      status: "live",
+      category: category,
+    });
     if (artworks) res.status(200).json(artworks);
     else return next(createError(404, "Category Not Found"));
   } catch (err) {
@@ -116,6 +125,7 @@ const getSearchedArtwork = async (req, res, next) => {
       return next(createError(404, "Please provide non empty search"));
 
     const searchQuery = {
+      status: "live",
       $or: keywordsArray.map((word) => ({
         $or: [
           { title: new RegExp(word, "i") },
@@ -170,6 +180,31 @@ const getBidInfo = async (req, res, next) => {
   }
 };
 
+const updateStatus = async (req, res, next) => {
+  try {
+    const artwork = await Artworks.findById(req.params.id);
+    if (!artwork) return res.status(404).send("Artwork not found");
+
+    const { status } = req.body;
+    if (!status) return res.status(400).send("Status is required");
+    if (artwork.status === status)
+      return res.status(200).send("Status is already set to that value");
+
+    artwork.status = status;
+    await artwork.save();
+
+    res.status(200).json(artwork);
+    // const updatedArtwork = await Artworks.findByIdAndUpdate(
+    //   req.params.id,
+    //   { $set: { status: req.body.status } },
+    //   { new: true }
+    // );
+    // res.status(200).json(updatedArtwork);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   add,
   checkDuplicate,
@@ -180,4 +215,5 @@ module.exports = {
   getAllArtworksByCategory,
   getArtworkArtist,
   getBidInfo,
+  updateStatus,
 };
