@@ -91,6 +91,18 @@ const getArtworkImage = async (req, res, next) => {
 
 const getAllArtworks = async (req, res, next) => {
   try {
+    const artworksupcomming = await Artworks.find({ status: "comming soon" });
+    if (artworksupcomming) {
+      for (let i = 0; i < artworksupcomming.length; i++) {
+        const document = artworksupcomming[i];
+        const status = verifyStatus(document.startdate, document.enddate);
+        if (status === "live") {
+          document.status = "live";
+          await document.save();
+        }
+      }
+    }
+
     const artworks = await Artworks.find({ status: "live" });
     res.status(200).json(artworks);
   } catch (err) {
