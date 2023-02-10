@@ -10,6 +10,7 @@ const {
   getArtworkArtist,
   getBidInfo,
   getSearchedArtwork,
+  updateStatus,
 } = require("../controllers/artwork.js");
 const { upload } = require("../utils/artworksUpload.js");
 const router = express.Router();
@@ -34,6 +35,9 @@ router.get("/all/category", getAllArtworksByCategory);
 
 //Search Artwork
 router.get("/search", getSearchedArtwork);
+
+//Update The status of artwork
+router.put("/status/:id", updateStatus);
 
 //Get artwork Artist name
 router.get("/madeby", getArtworkArtist);
