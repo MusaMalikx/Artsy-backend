@@ -18,6 +18,7 @@ const add = async (req, res, next) => {
     // if (msg !== "correct") return next(createError(403, msg));
 
     const status = verifyStatus(req.body.startdate, req.body.enddate);
+    console.log(status);
     const newartwork = new Artworks({
       artistId: req.user.id,
       images: paths,
@@ -217,6 +218,35 @@ const updateStatus = async (req, res, next) => {
   }
 };
 
+// Get Bidders list of firebase Ids for artwork along with artist firebase Id
+
+const getBiddersList = async (req, res, next) => {
+  try {
+    const artwork = await Artworks.findById(req.params.artId);
+    if (!artwork) return res.status(404).send("Artwork not found");
+    const artist = await Artist.findById(artwork.artistId);
+    if (!artist) return res.status(403).send("Artist not found");
+    const bidInfo = {
+      winner: "",
+      losers: [],
+      artistFid: artist.firebaseid,
+    };
+
+    if (artwork.bidderList.length > 0) {
+      artwork.bidderList.sort((e1, e2) => {
+        return e2.bid - e1.bid;
+      });
+      for (let i = 0; i < artwork.bidderList.length; i++) {
+        if (i === 0) bidInfo.winner = artwork.bidderList[i].bidderFid;
+        else bidInfo.losers.push(artwork.bidderList[i].bidderFid);
+      }
+    }
+    res.status(200).json(bidInfo);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   add,
   checkDuplicate,
@@ -228,4 +258,5 @@ module.exports = {
   getArtworkArtist,
   getBidInfo,
   updateStatus,
+  getBiddersList,
 };

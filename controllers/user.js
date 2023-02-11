@@ -100,6 +100,7 @@ const placeBid = async (req, res, next) => {
         $push: {
           bidderList: {
             bidderId: buyer.id,
+            bidderFid: buyer.firebaseid,
             bidderName: buyer.name,
             bid: bid,
             autoBid: {
@@ -264,6 +265,7 @@ const autoBid = async (req, res, next) => {
           bidderList: {
             bidderId: buyer.id,
             bidderName: buyer.name,
+            bidderFid: buyer.firebaseid,
             bid: currentExpected > maxAmount ? maxAmount : currentExpected,
             autoBid: {
               status: true,
