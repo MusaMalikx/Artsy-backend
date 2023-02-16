@@ -100,6 +100,7 @@ const placeBid = async (req, res, next) => {
         $push: {
           bidderList: {
             bidderId: buyer.id,
+            bidderFid: buyer.firebaseid,
             bidderName: buyer.name,
             bid: bid,
             autoBid: {
@@ -264,6 +265,7 @@ const autoBid = async (req, res, next) => {
           bidderList: {
             bidderId: buyer.id,
             bidderName: buyer.name,
+            bidderFid: buyer.firebaseid,
             bid: currentExpected > maxAmount ? maxAmount : currentExpected,
             autoBid: {
               status: true,
@@ -537,6 +539,8 @@ const acceptProposal = async (req, res, next) => {
   try {
     const buyer = await User.findOne({ _id: req.user.id });
     if (!buyer) return next(createError(404, "Buyer not logged in"));
+    const artist = await Artist.findOne({ _id: req.body.artistInfo.artistId });
+    if (!artist) return next(createError(404, "Artist does not exist!"));
     const proposal = await BuyerProposal.findOne({
       _id: req.params.proposalId,
     });
@@ -561,12 +565,14 @@ const acceptProposal = async (req, res, next) => {
         sender: {
           type: "Buyer",
           _id: req.user.id,
+          fid: buyer.firebaseid,
         },
         proposalId: req.params.proposalId,
         amount: parseFloat(req.body.acceptedAmount),
         receiver: {
           type: "Artist",
-          _id: req.body.artistInfo.artistId,
+          _id: artist._id,
+          fid: artist.firebaseid,
         },
       };
       const centralStoreBank = new CentralBank(bankInfo);
@@ -661,11 +667,22 @@ const releaseCentralPayment = async (req, res, next) => {
         });
         await newArtistWallet.save();
       }
+      const transactionInfo = {
+        sender: {
+          name: buyer.name,
+          fid: payment.sender.fid,
+        },
+        receiver: {
+          name: artist.name,
+          fid: payment.receiver.fid,
+        },
+        amount: payment.amount,
+      };
       await payment.deleteOne();
       await acceptedProposal.updateOne({
         paid: true,
       });
-      res.status(200).json("Successfully sent the amount!");
+      res.status(200).json(transactionInfo);
     } else return next(createError(403, "Wallet does exist!"));
   } catch (error) {
     return next(createError(500, "Server Error"));
