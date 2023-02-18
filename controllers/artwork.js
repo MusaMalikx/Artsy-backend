@@ -4,6 +4,7 @@ const Artist = require("../models/Artist");
 const fs = require("fs");
 const mime = require("mime");
 const { verifyStatus, verifyDates } = require("../utils/verifyStatus");
+const wonArtwork = require("../models/WonArtwork");
 
 const add = async (req, res, next) => {
   try {
@@ -203,6 +204,16 @@ const updateStatus = async (req, res, next) => {
     if (artwork.status === status)
       return res.status(200).send("Status is already set to that value");
 
+    //To check if an artowrk is closed and has a winning bidder make
+    if (artwork.currentbid !== 0 && status === "closed") {
+      const newartwork = new wonArtwork({
+        artworkId: artwork._id,
+        buyerId: artwork.bidderList[artwork.bidderList.length - 1].bidderId,
+        winningAmount: artwork.currentbid,
+      });
+      await newartwork.save();
+    }
+
     artwork.status = status;
     await artwork.save();
 
@@ -247,6 +258,59 @@ const getBiddersList = async (req, res, next) => {
   }
 };
 
+//Get listed artworks by artist closed or live or upcomming
+const getArtistListedArtworks = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({ _id: req.user.id });
+    if (!artist) return next(createError(404, "Artist Not logged in!"));
+
+    const artworks = await Artworks.aggregate([
+      {
+        $match: { artistId: req.user.id },
+      },
+      {
+        $lookup: {
+          from: "wonartworks",
+          localField: "_id",
+          foreignField: "artworkId",
+          as: "wonArtworks",
+        },
+      },
+      {
+        $unwind: {
+          path: "$wonArtworks",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          title: { $first: "$title" },
+          status: { $first: "$status" },
+          enddate: { $first: "$enddate" },
+          totalBids: { $first: "$bidderList" },
+          paymentStatus: { $first: "$wonArtworks.status" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          enddate: 1,
+          status: 1,
+          totalBids: { $size: "$totalBids" },
+          paymentStatus: "$paymentStatus",
+        },
+      },
+    ]);
+    // const dateOnly = dateString.split(",")[0];
+
+    res.status(200).json(artworks);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   add,
   checkDuplicate,
@@ -259,4 +323,5 @@ module.exports = {
   getBidInfo,
   updateStatus,
   getBiddersList,
+  getArtistListedArtworks,
 };
