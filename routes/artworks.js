@@ -1,6 +1,7 @@
 const express = require("express");
 const { verifyToken } = require("../utils/verifyToken");
 const {
+  getArtwork,
   add,
   checkDuplicate,
   getArtistArtworks,
@@ -16,6 +17,9 @@ const {
 } = require("../controllers/artwork.js");
 const { upload } = require("../utils/artworksUpload.js");
 const router = express.Router();
+
+//get an Artwork
+router.get("/artwork/:id", getArtwork);
 
 //Create Artwork
 router.post("/add", verifyToken, upload.array("productImage", 3), add);
