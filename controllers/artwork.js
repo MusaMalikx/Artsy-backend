@@ -6,10 +6,37 @@ const mime = require("mime");
 const { verifyStatus, verifyDates } = require("../utils/verifyStatus");
 const wonArtwork = require("../models/WonArtwork");
 
+//gets a single artwork given its id
 const getArtwork = async (req, res, next) => {
   try {
     const artwork = await Artworks.find({ _id: req.params.id });
     res.status(200).json(artwork);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
+//deletes an artwork only if it is closed with No bidder or if its status is upcomming
+const deleteArtwork = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({ _id: req.user.id });
+    if (!artist) return next(createError(404, "Artist Not logged in!"));
+
+    const artwork = await Artworks.findById(req.params.id);
+    if (!artwork) next(createError(404, "Artwork Not Found"));
+    if (artwork.status === "closed" && artwork.currentbid === 0) {
+      await artwork.remove();
+      return res.status(200).json({ message: "deleted" });
+    } else if (artwork.status === "comming soon") {
+      await artwork.remove();
+      return res.status(200).json({ message: "deleted" });
+    } else if (artwork.status === "closed") {
+      next(createError(400, "Artwork Already Won"));
+    } else if (artwork.status === "live") {
+      next(createError(400, "Artwork Already Live"));
+    } else {
+      next(createError(400, "Can not delete"));
+    }
   } catch (err) {
     next(createError(500, "Server Error"));
   }
@@ -374,6 +401,7 @@ const getArtistListedArtworks = async (req, res, next) => {
 
 module.exports = {
   getArtwork,
+  deleteArtwork,
   add,
   checkDuplicate,
   getArtistArtworks,

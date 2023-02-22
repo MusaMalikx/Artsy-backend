@@ -2,6 +2,7 @@ const express = require("express");
 const { verifyToken } = require("../utils/verifyToken");
 const {
   getArtwork,
+  deleteArtwork,
   add,
   checkDuplicate,
   getArtistArtworks,
@@ -20,6 +21,9 @@ const router = express.Router();
 
 //get an Artwork
 router.get("/artwork/:id", getArtwork);
+
+//Delete an Artwork
+router.delete("/artwork/delete/:id", verifyToken, deleteArtwork);
 
 //Create Artwork
 router.post("/add", verifyToken, upload.array("productImage", 3), add);
