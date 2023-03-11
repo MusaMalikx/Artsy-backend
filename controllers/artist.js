@@ -123,19 +123,19 @@ const newProposals = async (req, res, next) => {
     if (!artist) return next(createError(404, "Artist not logged in"));
     const buyerProposal = await BuyerProposal.find();
     if (!buyerProposal) return next(createError(403, "Proposals not found!"));
-    const newProposals = buyerProposal.map((proposal) => {
-      let flag = false;
-      proposal.artistProposals.forEach((artistBid) => {
-        if (artistBid.artistId === req.user.id) {
-          flag = true;
-          return;
-        }
-      });
-      if (flag) return null;
-      return proposal;
-    });
-
-    res.status(200).json(newProposals.filter((prop) => prop != null));
+    // const newProposals = buyerProposal.map((proposal) => {
+    //   let flag = false;
+    //   proposal.artistProposals.forEach((artistBid) => {
+    //     if (artistBid.artistId === req.user.id) {
+    //       flag = true;
+    //       return;
+    //     }
+    //   });
+    //   if (flag) return null;
+    //   return proposal;
+    // });
+    // res.status(200).json(newProposals.filter((prop) => prop != null));
+    res.status(200).json(buyerProposal);
   } catch (err) {
     return next(createError(500, "Server Error"));
   }
