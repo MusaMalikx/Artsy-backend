@@ -14,10 +14,14 @@ const {
   deleteProposals,
   getArtistProposalBids,
   acceptProposal,
-  releaseCentralPayment,
+  releaseCentralPaymentProposal,
   getAcceptedProposalList,
   deleteAcceptedProposal,
   getAllUsers,
+  getWonArtworks,
+  claimArtwork,
+  releaseCentralPaymentArtwork,
+  giveRating,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -64,13 +68,33 @@ router.get("/proposal/artistbid/:proposalId", getArtistProposalBids);
 //Accept a artist proposal for a on-demand artwork
 router.post("/proposal/accept/:proposalId", verifyToken, acceptProposal);
 
-//Release Central Payment
-router.get("/payment/release/:proposalId", verifyToken, releaseCentralPayment);
+//Release Central Payment for Proposal
+router.get(
+  "/payment/release/:proposalId",
+  verifyToken,
+  releaseCentralPaymentProposal
+);
 
 //Get Accepted Proposal List
 router.get("/proposal/accepted", verifyToken, getAcceptedProposalList);
 
 //Get Accepted Proposal List
 router.post(`/proposal/accepted/delete`, verifyToken, deleteAcceptedProposal);
+
+//get all artworks won by the buyer
+router.get(`/find/artworks/won/:buyerId`, getWonArtworks);
+
+//Claim artwork won in an auction
+router.post(`/artworks/claim/:artworkId`, verifyToken, claimArtwork);
+
+//Release Central Payment for Artwork
+router.get(
+  "/payment/release/artwork/:artworkId",
+  verifyToken,
+  releaseCentralPaymentArtwork
+);
+
+//Give Rating
+router.post(`/rate/artist/:artistId`, verifyToken, giveRating);
 
 module.exports = router;

@@ -1,6 +1,15 @@
 const express = require("express");
 const { verifyToken } = require("../utils/verifyToken");
-const { getWalletInfo,addWallet,getArtist,bidProposal,newProposals, getAllArtists } = require("../controllers/artist");
+const {
+  getWalletInfo,
+  addWallet,
+  getArtist,
+  bidProposal,
+  newProposals,
+  getAllArtists,
+  getAllRatings,
+  getRatingAverage,
+} = require("../controllers/artist");
 
 const router = express.Router();
 
@@ -21,5 +30,11 @@ router.post(`/proposal/bid/:proposalId`, verifyToken, bidProposal);
 
 //Get all the new buyers proposal where artist has not placed a bid
 router.get(`/proposal`, verifyToken, newProposals);
+
+//Get all ratings given by buyers
+router.get(`/rating/:artistId`, getAllRatings);
+
+//Get average and total number of ratings
+router.get(`/rating/average/:artistId`, getRatingAverage);
 
 module.exports = router;

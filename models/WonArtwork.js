@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const wonArtwork = new mongoose.Schema(
   {
     artworkId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "Artwork",
       required: true,
     },
@@ -15,8 +15,8 @@ const wonArtwork = new mongoose.Schema(
       required: true,
     },
     status: {
-      type: Boolean,
-      default: false,
+      type: String,
+      default: "claim",
     },
   },
   { timestamps: false }
