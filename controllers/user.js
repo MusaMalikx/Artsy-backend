@@ -54,11 +54,13 @@ const getAllUsers = async (req, res, next) => {
 
 const getAllCount = async (req, res, next) => {
   try {
-    const users = await User.find({});
-    const artists = await Artist.find({})
+    const users = await User.find({ isAdmin: false });
+    const admins = await User.find({ isAdmin: true });
+    const artists = await Artist.find({});
     const artworks = await Artwork.find({});
     res.status(200).json({
       users: users.length,
+      admins: admins.length,
       artists: artists.length,
       artworks: artworks.length,
     });
