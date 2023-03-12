@@ -185,6 +185,15 @@ const getRatingAverage = async (req, res, next) => {
   }
 };
 
+const deleteArtist = async (req, res, next) => {
+  try {
+    await Artist.findByIdAndDelete(req.params.id);
+    res.status(200).json("Artist has been deleted!");
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   getWalletInfo,
   addWallet,
@@ -194,4 +203,5 @@ module.exports = {
   newProposals,
   getAllRatings,
   getRatingAverage,
+  deleteArtist,
 };

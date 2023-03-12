@@ -12,6 +12,8 @@ const BuyerProposal = require("../models/BuyerProposal");
 const AcceptedProposal = require("../models/AcceptedProposal");
 const CentralBank = require("../models/CentralBank");
 const WonArtwork = require("../models/WonArtwork");
+const Users = require("../models/Users");
+const Artwork = require("../models/Artwork");
 
 const update = async (req, res, next) => {
   if (req.params.id === req.user.id) {
@@ -45,6 +47,21 @@ const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
     res.status(200).json(users);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
+const getAllCount = async (req, res, next) => {
+  try {
+    const users = await User.find({});
+    const artists = await Artist.find({})
+    const artworks = await Artwork.find({});
+    res.status(200).json({
+      users: users.length,
+      artists: artists.length,
+      artworks: artworks.length,
+    });
   } catch (err) {
     next(createError(500, "Server Error"));
   }
@@ -932,10 +949,20 @@ const giveRating = async (req, res, next) => {
   }
 };
 
+const deleteUser = async (req, res, next) => {
+  try {
+    await Users.findByIdAndDelete(req.params.id);
+    res.status(200).json("The User has been deleted!");
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   update,
   getUser,
   getAllUsers,
+  getAllCount,
   placeBid,
   autoBid,
   addWallet,
@@ -954,4 +981,5 @@ module.exports = {
   claimArtwork,
   releaseCentralPaymentArtwork,
   giveRating,
+  deleteUser,
 };
