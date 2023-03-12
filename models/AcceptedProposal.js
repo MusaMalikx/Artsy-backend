@@ -3,6 +3,7 @@ const acceptedProposal = new mongoose.Schema(
   {
     buyerId: {
       type: String,
+      ref: "User",
       required: true,
     },
     proposalId: {
@@ -14,6 +15,10 @@ const acceptedProposal = new mongoose.Schema(
       default: false,
     },
     title: {
+      type: String,
+      required: true,
+    },
+    description: {
       type: String,
       required: true,
     },

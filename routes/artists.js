@@ -9,6 +9,7 @@ const {
   getAllArtists,
   getAllRatings,
   getRatingAverage,
+  getAcceptedProposals,
 } = require("../controllers/artist");
 
 const router = express.Router();
@@ -30,6 +31,9 @@ router.post(`/proposal/bid/:proposalId`, verifyToken, bidProposal);
 
 //Get all the new buyers proposal where artist has not placed a bid
 router.get(`/proposal`, verifyToken, newProposals);
+
+//Get Accepted bids on Proposals
+router.get("/proposal/accepted", verifyToken, getAcceptedProposals);
 
 //Get all ratings given by buyers
 router.get(`/rating/:artistId`, getAllRatings);

@@ -556,6 +556,7 @@ const acceptProposal = async (req, res, next) => {
       buyerId: req.user.id,
       proposalId: req.params.proposalId,
       title: proposal.title,
+      description: proposal.description,
       dateCreated: proposal.dateCreated,
       ...req.body,
     };
@@ -746,7 +747,7 @@ const getWonArtworks = async (req, res, next) => {
     }
     res.status(200).json(artworksList);
   } catch (err) {
-    next(createError(500, "Server Error"));
+    next(createError(500, err.message));
   }
 };
 
