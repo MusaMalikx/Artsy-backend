@@ -23,6 +23,7 @@ const {
   releaseCentralPaymentArtwork,
   giveRating,
   deleteUser,
+  getAllCount,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -35,6 +36,9 @@ router.get("/find/:id", getUser);
 
 //get all user
 router.get("/", getAllUsers);
+
+//get total count
+router.get("/count", getAllCount);
 
 //Place a bid on an Artwork
 router.post("/bid/:artId", verifyToken, placeBid);
