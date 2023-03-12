@@ -7,7 +7,7 @@ const centralBankSchema = new mongoose.Schema(
     },
     proposalId: {
       type: String,
-      required: true,
+      default: "",
     },
     amount: {
       type: Number,

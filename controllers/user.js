@@ -11,6 +11,7 @@ const WalletArtist = require("../models/WalletArtist");
 const BuyerProposal = require("../models/BuyerProposal");
 const AcceptedProposal = require("../models/AcceptedProposal");
 const CentralBank = require("../models/CentralBank");
+const WonArtwork = require("../models/WonArtwork");
 
 const update = async (req, res, next) => {
   if (req.params.id === req.user.id) {
@@ -594,8 +595,8 @@ const acceptProposal = async (req, res, next) => {
   }
 };
 
-//Release Central Payment
-const releaseCentralPayment = async (req, res, next) => {
+//Release Central Payment for Proposal
+const releaseCentralPaymentProposal = async (req, res, next) => {
   try {
     const buyer = await User.findOne({
       _id: req.user.id,
@@ -720,6 +721,217 @@ const deleteAcceptedProposal = async (req, res, next) => {
   }
 };
 
+//get all artworks won by the buyer
+const getWonArtworks = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.params.buyerId });
+    if (!buyer) return next(createError(404, "Buyer not logged in"));
+    const wonArtworks = await WonArtwork.find({
+      buyerId: buyer._id,
+    });
+
+    const artworksList = [];
+    for (let i = 0; i < wonArtworks.length; i++) {
+      const artwork = await Artworks.findOne({
+        _id: wonArtworks[i].artworkId,
+      });
+      const artist = await Artist.findOne({
+        _id: artwork.artistId,
+      });
+      artworksList.push({
+        paymentStatus: wonArtworks[i].status,
+        artistFid: artist.firebaseid,
+        ...artwork._doc,
+      });
+    }
+    res.status(200).json(artworksList);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
+//Claim artwork won in an auction
+const claimArtwork = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "Buyer not logged in"));
+    const artist = await Artist.findOne({ _id: req.body.artistId });
+    if (!artist) return next(createError(404, "Artist does not exist!"));
+    const artwork = await WonArtwork.findOne({
+      artworkId: req.params.artworkId,
+    });
+    if (!artwork) return next(createError(403, "Artwork not found!"));
+    const wallet = await WalletBuyer.findOne({
+      buyerId: req.user.id,
+    });
+    if (!wallet) return next(createError(402, "Not Enough credits in wallet!"));
+    if (wallet.Amount < parseFloat(req.body.acceptedAmount))
+      return next(createError(402, "Not Enough credits in wallet!"));
+
+    const updatedArtwork = await artwork.update({
+      $set: {
+        status: "payment",
+      },
+    });
+
+    if (updatedArtwork) {
+      const bankInfo = {
+        sender: {
+          type: "Buyer",
+          _id: req.user.id,
+          fid: buyer.firebaseid,
+        },
+        amount: parseFloat(req.body.acceptedAmount),
+        proposalId: artwork.artworkId,
+        receiver: {
+          type: "Artist",
+          _id: artist._id,
+          fid: artist.firebaseid,
+        },
+      };
+      const centralStoreBank = new CentralBank(bankInfo);
+      const savedBankInfo = await centralStoreBank.save();
+      if (savedBankInfo) {
+        const updatedWallet = await wallet.updateOne({
+          $set: {
+            Amount: wallet.Amount - parseFloat(req.body.acceptedAmount),
+          },
+        });
+        if (updatedWallet.modifiedCount > 0) {
+          res.status(200).json("Succesfully accepted the wallet");
+        }
+      }
+    }
+  } catch (error) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
+//Release Central Payment for Artwork
+const releaseCentralPaymentArtwork = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({
+      _id: req.user.id,
+    });
+    if (!buyer) return next(createError(404, "User not logged in"));
+    const payment = await CentralBank.findOne({
+      proposalId: req.params.artworkId,
+    });
+    if (!payment) return next(createError(403, "Invalid Transaction!"));
+    const artwork = await WonArtwork.findOne({
+      artworkId: req.params.artworkId,
+    });
+    if (!artwork) return next(createError(403, "Artwork not found!"));
+    if (payment.sender._id !== req.user.id)
+      return next(createError(402, "Unauthorized to release payment!"));
+    const artist = await Artist.findOne({
+      _id: payment.receiver._id,
+    });
+    if (!artist) return next(createError(403, "Invalid Receiver!"));
+    const wallet = await WalletBuyer.findOne({ buyerId: req.user.id });
+    if (wallet) {
+      //Updating buyer wallet
+      await wallet.updateOne({
+        $set: {
+          ...wallet._doc,
+          Transactions: [
+            ...wallet.Transactions,
+            {
+              sent: true, //sender
+              userName: artist.name,
+              Amount: parseFloat(payment.amount),
+            },
+          ],
+        },
+      });
+      //Updating artist wallet
+      const artistWallet = await WalletArtist.findOne({
+        artistId: artist._id,
+      });
+      if (artistWallet) {
+        //Updating artist wallet
+        await artistWallet.updateOne({
+          $set: {
+            ...artistWallet._doc,
+            Amount:
+              parseFloat(artistWallet.Amount) + parseFloat(payment.amount),
+            Transactions: [
+              ...artistWallet.Transactions,
+              {
+                sent: false, //receiver
+                userName: buyer.name,
+                Amount: parseFloat(payment.amount),
+              },
+            ],
+          },
+        });
+      } //create a wallet for artist
+      else {
+        const newArtistWallet = new WalletArtist({
+          Amount: parseFloat(payment.amount),
+          artistId: artist._id,
+          Transactions: [
+            {
+              sent: false, //receiver
+              userName: buyer.name,
+              Amount: parseFloat(payment.amount),
+            },
+          ],
+        });
+        await newArtistWallet.save();
+      }
+      const transactionInfo = {
+        sender: {
+          name: buyer.name,
+          fid: payment.sender.fid,
+        },
+        receiver: {
+          name: artist.name,
+          fid: payment.receiver.fid,
+        },
+        amount: payment.amount,
+      };
+      await payment.deleteOne();
+      await artwork.update({
+        $set: {
+          status: "paid",
+        },
+      });
+      res.status(200).json(transactionInfo);
+    } else return next(createError(403, "Wallet does exist!"));
+  } catch (error) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
+const giveRating = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "Buyer not logged in"));
+
+    const artist = await Artist.findOne({
+      _id: req.params.artistId,
+    });
+    if (!artist) return next(createError(404, "Artist not found!"));
+    let options = { year: "numeric", month: "long", day: "numeric" };
+    const date = new Date();
+    await artist.update({
+      $push: {
+        rating: {
+          ratedValue: req.body.ratedValue,
+          buyerId: req.user.id,
+          description: req.body.description,
+          date: date.toLocaleString("en-GB", options),
+        },
+      },
+    });
+
+    res.status(200).json("Rating succesfully placed!");
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   update,
   getUser,
@@ -735,7 +947,11 @@ module.exports = {
   deleteProposals,
   getArtistProposalBids,
   acceptProposal,
-  releaseCentralPayment,
+  releaseCentralPaymentProposal,
   getAcceptedProposalList,
   deleteAcceptedProposal,
+  getWonArtworks,
+  claimArtwork,
+  releaseCentralPaymentArtwork,
+  giveRating,
 };

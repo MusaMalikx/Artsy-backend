@@ -140,6 +140,51 @@ const newProposals = async (req, res, next) => {
     return next(createError(500, "Server Error"));
   }
 };
+
+//Get Ratings given by buyers
+
+const getAllRatings = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({ _id: req.params.artistId });
+    if (!artist) return next(createError(404, "Artist not logged in"));
+    const ratingList = [];
+    console.log(artist.rating);
+    for (let i = 0; i < artist.rating.length; i++) {
+      const buyer = await Users.findOne({
+        _id: artist.rating[i].buyerId,
+      });
+      ratingList.push({
+        ...artist.rating[i],
+        buyerName: buyer.name,
+        buyerPicture: buyer.imageURL,
+      });
+    }
+    res.status(200).json(ratingList);
+  } catch (error) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
+//Get total count and average of ratings
+const getRatingAverage = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({ _id: req.params.artistId });
+    if (!artist) return next(createError(404, "Artist not logged in"));
+    let totalRatings = 0;
+    let sum = 0;
+    for (let i = 0; i < artist.rating.length; i++) {
+      sum += parseInt(artist.rating[i].ratedValue);
+      totalRatings++;
+    }
+    res.status(200).json({
+      totalRatings: totalRatings,
+      averageRating: Math.floor(sum / totalRatings),
+    });
+  } catch (error) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   getWalletInfo,
   addWallet,
@@ -147,4 +192,6 @@ module.exports = {
   getAllArtists,
   bidProposal,
   newProposals,
+  getAllRatings,
+  getRatingAverage,
 };

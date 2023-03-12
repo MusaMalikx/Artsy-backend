@@ -4,6 +4,43 @@ const Artist = require("../models/Artist");
 const fs = require("fs");
 const mime = require("mime");
 const { verifyStatus, verifyDates } = require("../utils/verifyStatus");
+const wonArtwork = require("../models/WonArtwork");
+
+//gets a single artwork given its id
+const getArtwork = async (req, res, next) => {
+  try {
+    const artwork = await Artworks.find({ _id: req.params.id });
+    res.status(200).json(artwork);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
+//deletes an artwork only if it is closed with No bidder or if its status is upcomming
+const deleteArtwork = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({ _id: req.user.id });
+    if (!artist) return next(createError(404, "Artist Not logged in!"));
+
+    const artwork = await Artworks.findById(req.params.id);
+    if (!artwork) next(createError(404, "Artwork Not Found"));
+    if (artwork.status === "closed" && artwork.currentbid === 0) {
+      await artwork.remove();
+      return res.status(200).json({ message: "deleted" });
+    } else if (artwork.status === "comming soon") {
+      await artwork.remove();
+      return res.status(200).json({ message: "deleted" });
+    } else if (artwork.status === "closed") {
+      next(createError(400, "Artwork Already Won"));
+    } else if (artwork.status === "live") {
+      next(createError(400, "Artwork Already Live"));
+    } else {
+      next(createError(400, "Can not delete"));
+    }
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
 
 const add = async (req, res, next) => {
   try {
@@ -203,6 +240,16 @@ const updateStatus = async (req, res, next) => {
     if (artwork.status === status)
       return res.status(200).send("Status is already set to that value");
 
+    //To check if an artowrk is closed and has a winning bidder make
+    if (artwork.currentbid !== 0 && status === "closed") {
+      const newartwork = new wonArtwork({
+        artworkId: artwork._id,
+        buyerId: artwork.bidderList[artwork.bidderList.length - 1].bidderId,
+        winningAmount: artwork.currentbid,
+      });
+      await newartwork.save();
+    }
+
     artwork.status = status;
     await artwork.save();
 
@@ -247,7 +294,114 @@ const getBiddersList = async (req, res, next) => {
   }
 };
 
+//Get listed artworks by artist closed or live or upcomming
+const getArtistListedArtworks = async (req, res, next) => {
+  try {
+    let status = req.query.status;
+    const artist = await Artist.findOne({ _id: req.user.id });
+    if (!artist) return next(createError(404, "Artist Not logged in!"));
+
+    if (status === "All") {
+      const artworks = await Artworks.aggregate([
+        {
+          $match: { artistId: req.user.id },
+        },
+        {
+          $lookup: {
+            from: "wonartworks",
+            localField: "_id",
+            foreignField: "artworkId",
+            as: "wonArtworks",
+          },
+        },
+        {
+          $unwind: {
+            path: "$wonArtworks",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            title: { $first: "$title" },
+            status: { $first: "$status" },
+            enddate: { $first: "$enddate" },
+            totalBids: { $first: "$bidderList" },
+            paymentStatus: { $first: "$wonArtworks.status" },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            enddate: 1,
+            status: 1,
+            totalBids: { $size: "$totalBids" },
+            paymentStatus: "$paymentStatus",
+          },
+        },
+        {
+          $sort: {
+            title: 1,
+          },
+        },
+      ]);
+      res.status(200).json(artworks);
+    } else {
+      const artworks = await Artworks.aggregate([
+        {
+          $match: { artistId: req.user.id, status: status.toLowerCase() },
+        },
+        {
+          $lookup: {
+            from: "wonartworks",
+            localField: "_id",
+            foreignField: "artworkId",
+            as: "wonArtworks",
+          },
+        },
+        {
+          $unwind: {
+            path: "$wonArtworks",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            title: { $first: "$title" },
+            status: { $first: "$status" },
+            enddate: { $first: "$enddate" },
+            totalBids: { $first: "$bidderList" },
+            paymentStatus: { $first: "$wonArtworks.status" },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            enddate: 1,
+            status: 1,
+            totalBids: { $size: "$totalBids" },
+            paymentStatus: "$paymentStatus",
+          },
+        },
+        {
+          $sort: {
+            title: 1,
+          },
+        },
+      ]);
+      res.status(200).json(artworks);
+    }
+  } catch (err) {
+    next(createError(500, err));
+  }
+};
+
 module.exports = {
+  getArtwork,
+  deleteArtwork,
   add,
   checkDuplicate,
   getArtistArtworks,
@@ -259,4 +413,5 @@ module.exports = {
   getBidInfo,
   updateStatus,
   getBiddersList,
+  getArtistListedArtworks,
 };
