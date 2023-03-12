@@ -12,6 +12,7 @@ const BuyerProposal = require("../models/BuyerProposal");
 const AcceptedProposal = require("../models/AcceptedProposal");
 const CentralBank = require("../models/CentralBank");
 const WonArtwork = require("../models/WonArtwork");
+const Users = require("../models/Users");
 
 const update = async (req, res, next) => {
   if (req.params.id === req.user.id) {
@@ -932,6 +933,15 @@ const giveRating = async (req, res, next) => {
   }
 };
 
+const deleteUser = async (req, res, next) => {
+  try {
+    await Users.findByIdAndDelete(req.params.id);
+    res.status(200).json("The User has been deleted!");
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   update,
   getUser,
@@ -954,4 +964,5 @@ module.exports = {
   claimArtwork,
   releaseCentralPaymentArtwork,
   giveRating,
+  deleteUser,
 };

@@ -22,6 +22,7 @@ const {
   claimArtwork,
   releaseCentralPaymentArtwork,
   giveRating,
+  deleteUser,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -96,5 +97,8 @@ router.get(
 
 //Give Rating
 router.post(`/rate/artist/:artistId`, verifyToken, giveRating);
+
+//Delete an Artist
+router.delete("/:id", deleteUser);
 
 module.exports = router;
