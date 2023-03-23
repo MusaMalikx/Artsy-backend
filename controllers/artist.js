@@ -1,4 +1,5 @@
 const { createError } = require("../error");
+const AcceptedProposal = require("../models/AcceptedProposal");
 const Artist = require("../models/Artist");
 const BuyerProposal = require("../models/BuyerProposal");
 const Users = require("../models/Users");
@@ -141,6 +142,25 @@ const newProposals = async (req, res, next) => {
   }
 };
 
+//Get all Artists approved bids on Proposals
+const getAcceptedProposals = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({ _id: req.user.id });
+    if (!artist) return next(createError(404, "Artist not logged in"));
+
+    AcceptedProposal.find({ "artistInfo.artistId": req.user.id })
+      .populate("buyerId", "name")
+      .exec((err, proposals) => {
+        if (err) {
+          return next(createError(500, err));
+        }
+        return res.status(200).json(proposals);
+      });
+  } catch (err) {
+    return next(createError(500, "Server Error"));
+  }
+};
+
 //Get Ratings given by buyers
 
 const getAllRatings = async (req, res, next) => {
@@ -203,5 +223,6 @@ module.exports = {
   newProposals,
   getAllRatings,
   getRatingAverage,
+  getAcceptedProposals,
   deleteArtist,
 };
