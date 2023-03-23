@@ -105,6 +105,7 @@ const getArtistArtworks = async (req, res, next) => {
       artworks: artworks,
       name: artist.name,
       imageURL: artist.imageURL,
+      email: artist.email,
     });
   } catch (err) {
     next(createError(500, "Server Error"));
