@@ -961,6 +961,22 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+//update personal information of buyer
+const updateInfo = async (req, res, next) => {
+  try {
+    const buyer = await Users.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "Buyer not logged in"));
+    await buyer.updateOne({
+      $set: {
+        ...req.body,
+      },
+    });
+    res.status(200).json("Buyer Information Updated Succesfully");
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   update,
   getUser,
@@ -985,4 +1001,5 @@ module.exports = {
   releaseCentralPaymentArtwork,
   giveRating,
   deleteUser,
+  updateInfo,
 };

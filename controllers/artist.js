@@ -214,6 +214,22 @@ const deleteArtist = async (req, res, next) => {
   }
 };
 
+//update personal information of artist
+const updateInfo = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({ _id: req.user.id });
+    if (!artist) return next(createError(404, "Artist not logged in"));
+    await artist.updateOne({
+      $set: {
+        ...req.body,
+      },
+    });
+    res.status(200).json("Artist Information Updated Succesfully");
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   getWalletInfo,
   addWallet,
@@ -225,4 +241,5 @@ module.exports = {
   getRatingAverage,
   getAcceptedProposals,
   deleteArtist,
+  updateInfo,
 };

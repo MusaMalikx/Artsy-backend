@@ -17,9 +17,11 @@ const ArtistSchema = new mongoose.Schema(
     },
     phonenumber: {
       type: String,
+      default: "",
     },
     cnic: {
       type: String,
+      default: "",
     },
     fromGoogle: {
       type: Boolean,
@@ -40,6 +42,14 @@ const ArtistSchema = new mongoose.Schema(
     rating: {
       type: [Object],
       default: [],
+    },
+    location: {
+      type: String,
+      default: "",
+    },
+    languages: {
+      type: String,
+      default: "",
     },
   },
   { timestamps: true }

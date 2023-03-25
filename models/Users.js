@@ -18,9 +18,11 @@ const UserSchema = new mongoose.Schema(
     },
     phonenumber: {
       type: String,
+      default: "",
     },
     cnic: {
       type: String,
+      default: "",
     },
     fromGoogle: {
       type: Boolean,
@@ -31,6 +33,14 @@ const UserSchema = new mongoose.Schema(
       default: false,
     },
     imageURL: {
+      type: String,
+      default: "",
+    },
+    location: {
+      type: String,
+      default: "",
+    },
+    languages: {
       type: String,
       default: "",
     },
