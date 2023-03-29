@@ -10,6 +10,7 @@ const {
   getAllRatings,
   getRatingAverage,
   getAcceptedProposals,
+  reportBuyer,
   deleteArtist,
 } = require("../controllers/artist");
 
@@ -42,8 +43,10 @@ router.get(`/rating/:artistId`, getAllRatings);
 //Get average and total number of ratings
 router.get(`/rating/average/:artistId`, getRatingAverage);
 
+//Report a buyer
+router.post("/report/buyer", verifyToken, reportBuyer);
+
 //Delete an Artist
 router.delete("/:id", deleteArtist);
-
 
 module.exports = router;
