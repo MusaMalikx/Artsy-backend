@@ -4,6 +4,7 @@ const Artist = require("../models/Artist");
 const BuyerProposal = require("../models/BuyerProposal");
 const Users = require("../models/Users");
 const WalletArtist = require("../models/WalletArtist");
+const Reports = require("../models/Reports");
 
 //Add amount in the wallet
 const addWallet = async (req, res, next) => {
@@ -225,6 +226,46 @@ const updateInfo = async (req, res, next) => {
       },
     });
     res.status(200).json("Artist Information Updated Succesfully");
+      } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
+const reportBuyer = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({
+      _id: req.user.id,
+    });
+    if (!artist) return next(createError(404, "Artist not logged In"));
+
+    const buyer = await Users.findOne({ _id: req.body.buyerid });
+    if (!buyer) return next(createError(404, "Buyer not found!"));
+
+    const report = await Reports.findOne({
+      "buyer.id": buyer._id,
+      "artist.id": artist._id,
+      reportType: "buyer",
+    });
+
+    if (report) return next(createError(400, "Already Reported"));
+    //complete from here
+    const newReport = new Reports({
+      reportType: "buyer",
+      artist: {
+        id: artist._id,
+        name: artist.name,
+      },
+      buyer: {
+        id: buyer._id,
+        name: buyer.name,
+      },
+      category: req.body.category,
+      description: req.body.description,
+    });
+
+    await newReport.save();
+
+    res.status(200).json("Report succesfully placed!");
   } catch (err) {
     next(createError(500, "Server Error"));
   }
@@ -242,4 +283,5 @@ module.exports = {
   getAcceptedProposals,
   deleteArtist,
   updateInfo,
+  reportBuyer,
 };

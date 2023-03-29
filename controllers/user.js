@@ -14,6 +14,7 @@ const CentralBank = require("../models/CentralBank");
 const WonArtwork = require("../models/WonArtwork");
 const Users = require("../models/Users");
 const Artwork = require("../models/Artwork");
+const Reports = require("../models/Reports");
 
 const update = async (req, res, next) => {
   if (req.params.id === req.user.id) {
@@ -977,6 +978,46 @@ const updateInfo = async (req, res, next) => {
   }
 };
 
+const reportArtist = async (req, res, next) => {
+  try {
+    const buyer = await User.findOne({ _id: req.user.id });
+    if (!buyer) return next(createError(404, "Buyer not logged In"));
+
+    const artist = await Artist.findOne({
+      _id: req.body.artistid,
+    });
+    if (!artist) return next(createError(404, "Artist not found!"));
+
+    const report = await Reports.findOne({
+      "buyer.id": buyer._id,
+      "artist.id": artist._id,
+      reportType: "artist",
+    });
+
+    if (report) return next(createError(400, "Already Reported"));
+    //complete from here
+    const newReport = new Reports({
+      reportType: "artist",
+      artist: {
+        id: artist._id,
+        name: artist.name,
+      },
+      buyer: {
+        id: buyer._id,
+        name: buyer.name,
+      },
+      category: req.body.category,
+      description: req.body.description,
+    });
+
+    await newReport.save();
+
+    res.status(200).json("Report succesfully placed!");
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   update,
   getUser,
@@ -1000,6 +1041,7 @@ module.exports = {
   claimArtwork,
   releaseCentralPaymentArtwork,
   giveRating,
+  reportArtist,
   deleteUser,
   updateInfo,
 };

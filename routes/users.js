@@ -23,6 +23,7 @@ const {
   releaseCentralPaymentArtwork,
   giveRating,
   deleteUser,
+  reportArtist,
   getAllCount,
   updateInfo,
 } = require("../controllers/user");
@@ -103,7 +104,10 @@ router.get(
 //Give Rating
 router.post(`/rate/artist/:artistId`, verifyToken, giveRating);
 
-//Delete an User
+//Report a Artist
+router.post("/report/artist", verifyToken, reportArtist);
+
+//Delete an Artist
 router.delete("/:id", deleteUser);
 
 //Update Information of a buyer
