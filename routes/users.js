@@ -26,6 +26,7 @@ const {
   reportArtist,
   getAllCount,
   updateInfo,
+  getAllReports,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -112,5 +113,8 @@ router.delete("/:id", deleteUser);
 
 //Update Information of a buyer
 router.post("/update/info", verifyToken, updateInfo);
+
+//Update Information of an artist
+router.get("/reports", getAllReports);
 
 module.exports = router;

@@ -1018,6 +1018,15 @@ const reportArtist = async (req, res, next) => {
   }
 };
 
+const getAllReports = async (req, res, next) => {
+  try {
+    const reports = await Reports.find({});
+    res.status(200).json(reports);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   update,
   getUser,
@@ -1044,4 +1053,5 @@ module.exports = {
   reportArtist,
   deleteUser,
   updateInfo,
+  getAllReports,
 };
