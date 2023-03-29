@@ -103,9 +103,7 @@ const getArtistArtworks = async (req, res, next) => {
     const artworks = await Artworks.find({ artistId: req.params.artistId });
     res.status(200).json({
       artworks: artworks,
-      name: artist.name,
-      imageURL: artist.imageURL,
-      email: artist.email,
+      ...artist._doc,
     });
   } catch (err) {
     next(createError(500, "Server Error"));

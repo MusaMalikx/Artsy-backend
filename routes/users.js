@@ -25,6 +25,7 @@ const {
   deleteUser,
   reportArtist,
   getAllCount,
+  updateInfo,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -108,5 +109,8 @@ router.post("/report/artist", verifyToken, reportArtist);
 
 //Delete an Artist
 router.delete("/:id", deleteUser);
+
+//Update Information of a buyer
+router.post("/update/info", verifyToken, updateInfo);
 
 module.exports = router;
