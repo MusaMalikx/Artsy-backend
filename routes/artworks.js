@@ -8,6 +8,7 @@ const {
   getArtistArtworks,
   getArtworkImage,
   getAllArtworks,
+  getAllArtworksHome,
   getAllArtworksByCategory,
   getArtworkArtist,
   getBidInfo,
@@ -39,6 +40,9 @@ router.get("/image", getArtworkImage);
 
 //Get All artworks
 router.get("/all", getAllArtworks);
+
+//Get All for Home page
+router.get("/all/home", getAllArtworksHome);
 
 //Get All artworks Filter by category
 router.get("/all/category", getAllArtworksByCategory);

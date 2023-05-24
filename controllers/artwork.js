@@ -147,6 +147,29 @@ const getAllArtworks = async (req, res, next) => {
   }
 };
 
+const getAllArtworksHome = async (req, res, next) => {
+  try {
+    const artworksupcomming = await Artworks.find({ status: "comming soon" });
+    if (artworksupcomming) {
+      for (let i = 0; i < artworksupcomming.length; i++) {
+        const document = artworksupcomming[i];
+        const status = verifyStatus(document.startdate, document.enddate);
+        if (status === "live") {
+          document.status = "live";
+          await document.save();
+        }
+      }
+    }
+
+    const artworks = await Artworks.find({ status: "live" })
+      .sort({ createdAt: -1 })
+      .limit(10);
+    res.status(200).json(artworks);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 const getAllArtworksByCategory = async (req, res, next) => {
   try {
     let { category } = req.query;
@@ -308,8 +331,16 @@ const getArtistListedArtworks = async (req, res, next) => {
         {
           $lookup: {
             from: "wonartworks",
-            localField: "_id",
-            foreignField: "artworkId",
+            let: { artworkId: { $toString: "$_id" } },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ["$artworkId", "$$artworkId"],
+                  },
+                },
+              },
+            ],
             as: "wonArtworks",
           },
         },
@@ -354,8 +385,16 @@ const getArtistListedArtworks = async (req, res, next) => {
         {
           $lookup: {
             from: "wonartworks",
-            localField: "_id",
-            foreignField: "artworkId",
+            let: { artworkId: { $toString: "$_id" } },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ["$artworkId", "$$artworkId"],
+                  },
+                },
+              },
+            ],
             as: "wonArtworks",
           },
         },
@@ -406,6 +445,7 @@ module.exports = {
   getArtistArtworks,
   getArtworkImage,
   getAllArtworks,
+  getAllArtworksHome,
   getSearchedArtwork,
   getAllArtworksByCategory,
   getArtworkArtist,
