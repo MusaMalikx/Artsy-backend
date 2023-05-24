@@ -4,6 +4,7 @@ const {
   getArtwork,
   deleteArtwork,
   add,
+  getCountArtworksStaus,
   checkDuplicate,
   getArtistArtworks,
   getArtworkImage,
@@ -34,6 +35,9 @@ router.post("/check", verifyToken, checkDuplicate);
 
 //Get Artworks Artist with name and profile image
 router.get("/artist/:artistId", getArtistArtworks);
+
+//Get Count of closed artworks
+router.get("/artist/status/:artistId", getCountArtworksStaus);
 
 //Get Artwork Image
 router.get("/image", getArtworkImage);

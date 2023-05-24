@@ -110,6 +110,24 @@ const getArtistArtworks = async (req, res, next) => {
   }
 };
 
+const getCountArtworksStaus = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({ _id: req.params.artistId });
+    if (!artist) return next(createError(404, "Artist Not logged in!"));
+    const status = req.query.status;
+    const count = await Artworks.countDocuments({
+      artistId: req.params.artistId,
+      status,
+    });
+
+    res.status(200).json({
+      count,
+    });
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 const getArtworkImage = async (req, res, next) => {
   try {
     const path = `${req.query.filename}`;
@@ -443,6 +461,7 @@ module.exports = {
   add,
   checkDuplicate,
   getArtistArtworks,
+  getCountArtworksStaus,
   getArtworkImage,
   getAllArtworks,
   getAllArtworksHome,
