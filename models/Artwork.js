@@ -2,8 +2,9 @@ const mongoose = require("mongoose");
 
 const ArtworkSchema = new mongoose.Schema({
   artistId: {
-    type: String,
+    type: mongoose.Types.ObjectId,
     required: true,
+    ref: "artists",
   },
   title: {
     type: String,

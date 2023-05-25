@@ -13,6 +13,7 @@ const {
   reportBuyer,
   deleteArtist,
   updateInfo,
+  getRecommendations,
 } = require("../controllers/artist");
 
 const router = express.Router();
@@ -52,5 +53,8 @@ router.delete("/:id", deleteArtist);
 
 //Update Information of an artist
 router.post("/update/info", verifyToken, updateInfo);
+
+//Update Information of an artist
+router.get("/recommendations", getRecommendations);
 
 module.exports = router;

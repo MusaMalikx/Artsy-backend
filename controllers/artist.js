@@ -5,6 +5,7 @@ const BuyerProposal = require("../models/BuyerProposal");
 const Users = require("../models/Users");
 const WalletArtist = require("../models/WalletArtist");
 const Reports = require("../models/Reports");
+const { default: mongoose } = require("mongoose");
 
 //Add amount in the wallet
 const addWallet = async (req, res, next) => {
@@ -226,7 +227,7 @@ const updateInfo = async (req, res, next) => {
       },
     });
     res.status(200).json("Artist Information Updated Succesfully");
-      } catch (err) {
+  } catch (err) {
     next(createError(500, "Server Error"));
   }
 };
@@ -271,6 +272,106 @@ const reportBuyer = async (req, res, next) => {
   }
 };
 
+const getRecommendations = async (req, res, next) => {
+  const { artistId, buyerId } = req.query;
+  // const buyer_id = "640df6cbc46adc74201ab0d9";
+
+  // console.log(req.query);
+
+  try {
+    const currentArtist = await Artist.findById(
+      mongoose.Types.ObjectId(artistId),
+      { rating: 1 }
+    );
+
+    let rating = 0;
+    for (let i = 0; i < currentArtist.rating.length; i++) {
+      rating += currentArtist.rating[i].ratedValue;
+    }
+
+    const averageRating =
+      rating / currentArtist.rating.length === 0
+        ? 1
+        : currentArtist.rating.length;
+
+    console.log(averageRating);
+
+    const artist = await Artist.aggregate([
+      {
+        $match: {
+          _id: { $ne: mongoose.Types.ObjectId(artistId) },
+        },
+      },
+      {
+        $match: {
+          $expr: {
+            $gt: [{ $size: "$rating" }, 1],
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "artworks",
+          localField: "_id",
+          foreignField: "artistId",
+          as: "artwork",
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          _id: 1,
+          firebaseid: 1,
+          rating: 1,
+          artwork: 1,
+          averageRating: { $avg: "$rating.ratedValue" },
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          _id: 1,
+          firebaseid: 1,
+          artwork: 1,
+          distance: {
+            $sqrt: {
+              $add: [
+                {
+                  $pow: [
+                    {
+                      $subtract: [averageRating, "$averageRating"],
+                    },
+                    2,
+                  ],
+                },
+                {
+                  $pow: [{ $subtract: [averageRating, "$averageRating"] }, 2],
+                },
+              ],
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          distance: { $ne: null },
+        },
+      },
+      {
+        $sort: { distance: 1 },
+      },
+      {
+        $limit: 5,
+      },
+    ]).exec();
+    return res.status(200).json(artist);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getWalletInfo,
   addWallet,
@@ -284,4 +385,5 @@ module.exports = {
   deleteArtist,
   updateInfo,
   reportBuyer,
+  getRecommendations,
 };
