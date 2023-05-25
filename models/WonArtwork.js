@@ -3,7 +3,7 @@ const wonArtwork = new mongoose.Schema(
   {
     artworkId: {
       type: String,
-      ref: "Artwork",
+      ref: "Artworks",
       required: true,
     },
     buyerId: {

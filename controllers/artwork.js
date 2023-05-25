@@ -110,6 +110,24 @@ const getArtistArtworks = async (req, res, next) => {
   }
 };
 
+const getCountArtworksStaus = async (req, res, next) => {
+  try {
+    const artist = await Artist.findOne({ _id: req.params.artistId });
+    if (!artist) return next(createError(404, "Artist Not logged in!"));
+    const status = req.query.status;
+    const count = await Artworks.countDocuments({
+      artistId: req.params.artistId,
+      status,
+    });
+
+    res.status(200).json({
+      count,
+    });
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 const getArtworkImage = async (req, res, next) => {
   try {
     const path = `${req.query.filename}`;
@@ -141,6 +159,29 @@ const getAllArtworks = async (req, res, next) => {
     }
 
     const artworks = await Artworks.find({ status: "live" });
+    res.status(200).json(artworks);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
+const getAllArtworksHome = async (req, res, next) => {
+  try {
+    const artworksupcomming = await Artworks.find({ status: "comming soon" });
+    if (artworksupcomming) {
+      for (let i = 0; i < artworksupcomming.length; i++) {
+        const document = artworksupcomming[i];
+        const status = verifyStatus(document.startdate, document.enddate);
+        if (status === "live") {
+          document.status = "live";
+          await document.save();
+        }
+      }
+    }
+
+    const artworks = await Artworks.find({ status: "live" })
+      .sort({ createdAt: -1 })
+      .limit(10);
     res.status(200).json(artworks);
   } catch (err) {
     next(createError(500, "Server Error"));
@@ -308,8 +349,16 @@ const getArtistListedArtworks = async (req, res, next) => {
         {
           $lookup: {
             from: "wonartworks",
-            localField: "_id",
-            foreignField: "artworkId",
+            let: { artworkId: { $toString: "$_id" } },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ["$artworkId", "$$artworkId"],
+                  },
+                },
+              },
+            ],
             as: "wonArtworks",
           },
         },
@@ -354,8 +403,16 @@ const getArtistListedArtworks = async (req, res, next) => {
         {
           $lookup: {
             from: "wonartworks",
-            localField: "_id",
-            foreignField: "artworkId",
+            let: { artworkId: { $toString: "$_id" } },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ["$artworkId", "$$artworkId"],
+                  },
+                },
+              },
+            ],
             as: "wonArtworks",
           },
         },
@@ -404,8 +461,10 @@ module.exports = {
   add,
   checkDuplicate,
   getArtistArtworks,
+  getCountArtworksStaus,
   getArtworkImage,
   getAllArtworks,
+  getAllArtworksHome,
   getSearchedArtwork,
   getAllArtworksByCategory,
   getArtworkArtist,

@@ -4,10 +4,12 @@ const {
   getArtwork,
   deleteArtwork,
   add,
+  getCountArtworksStaus,
   checkDuplicate,
   getArtistArtworks,
   getArtworkImage,
   getAllArtworks,
+  getAllArtworksHome,
   getAllArtworksByCategory,
   getArtworkArtist,
   getBidInfo,
@@ -34,11 +36,17 @@ router.post("/check", verifyToken, checkDuplicate);
 //Get Artworks Artist with name and profile image
 router.get("/artist/:artistId", getArtistArtworks);
 
+//Get Count of closed artworks
+router.get("/artist/status/:artistId", getCountArtworksStaus);
+
 //Get Artwork Image
 router.get("/image", getArtworkImage);
 
 //Get All artworks
 router.get("/all", getAllArtworks);
+
+//Get All for Home page
+router.get("/all/home", getAllArtworksHome);
 
 //Get All artworks Filter by category
 router.get("/all/category", getAllArtworksByCategory);
