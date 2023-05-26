@@ -61,6 +61,30 @@ const signinUser = async (req, res, next) => {
   }
 };
 
+const signinUserTest = async (req, res, next) => {
+  try {
+    // console.log(req.body);
+    const user = await User.findOne({
+      isAdmin: false,
+      email: req.body.email,
+      password: req.body.password,
+    });
+    console.log(user);
+    if (!user) return next(createError(404, "User not found!"));
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT);
+
+    const object = {
+      token: token,
+      user: user._doc,
+    };
+
+    res.status(200).json(object);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
 const signupArtist = async (req, res, next) => {
   try {
     const checkartist = await Artist.findOne({ email: req.body.email });
@@ -155,6 +179,29 @@ const signinArtist = async (req, res, next) => {
     const object = {
       token: token,
       user: artist._doc,
+    };
+
+    res.status(200).json(object);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
+const signinArtistTest = async (req, res, next) => {
+  try {
+    // console.log(req.body);
+    const user = await Artist.findOne({
+      email: req.body.email,
+      password: req.body.password,
+    });
+    console.log(user);
+    if (!user) return next(createError(404, "User not found!"));
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT);
+
+    const object = {
+      token: token,
+      user: user._doc,
     };
 
     res.status(200).json(object);
@@ -338,11 +385,13 @@ const logout = async (req, res, next) => {
 module.exports = {
   signupUser,
   signinUser,
+  signinUserTest,
   signupArtist,
   checkDetailsArtist,
   checkDetailsUser,
   checkDetailsAdmin,
   signinArtist,
+  signinArtistTest,
   signinAdmin,
   signupAdmin,
   googleAuthUser,

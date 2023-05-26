@@ -6,7 +6,8 @@ const centralBankSchema = new mongoose.Schema(
       required: true,
     },
     proposalId: {
-      type: String,
+      type: mongoose.Types.ObjectId,
+      ref: "buyerproposals",
       default: "",
     },
     amount: {

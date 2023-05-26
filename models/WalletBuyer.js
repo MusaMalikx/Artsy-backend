@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const buyerWalletSchema = new mongoose.Schema(
   {
     buyerId: {
-      type: String,
+      type: mongoose.Types.ObjectId,
       required: true,
     },
     Amount: {

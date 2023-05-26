@@ -2,13 +2,14 @@ const mongoose = require("mongoose");
 const wonArtwork = new mongoose.Schema(
   {
     artworkId: {
-      type: String,
-      ref: "Artworks",
+      type: mongoose.Types.ObjectId,
+      ref: "artworks",
       required: true,
     },
     buyerId: {
-      type: String,
+      type: mongoose.Types.ObjectId,
       required: true,
+      ref:'users'
     },
     winningAmount: {
       type: Number,
