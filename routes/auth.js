@@ -1,6 +1,7 @@
 const express = require("express");
 const {
   signinUser,
+  signinUserTest,
   signupUser,
   logout,
   googleAuthUser,
@@ -14,6 +15,7 @@ const {
   checkDetailsAdmin,
   googleSignupAdmin,
   googleSigninAdmin,
+  signinArtistTest,
 } = require("../controllers/auth.js");
 
 const router = express.Router();
@@ -24,6 +26,9 @@ router.post("/user/signup", signupUser);
 //SIGN IN
 router.post("/user/signin", signinUser);
 
+//TEST SIGN IN
+router.post("/user/signin-test", signinUserTest);
+
 //GOOGLE AUTH
 router.post("/user/google", googleAuthUser);
 
@@ -32,6 +37,9 @@ router.post("/artist/signup", signupArtist);
 
 //Signin Artist
 router.post("/artist/signin", signinArtist);
+
+//Test Artist
+router.post("/artist/signin-test", signinArtistTest);
 
 //Artist Google Auth
 router.post("/artist/google", googleAuthArtist);

@@ -8,6 +8,7 @@ const app = require("../app");
 const debug = require("debug")("artsy-backend-1.2:server");
 const http = require("http");
 const mongoose = require("mongoose");
+const { populateData } = require("../utils/populateData");
 
 /**
  * Get port from environment and store in Express.
@@ -44,6 +45,7 @@ mongoose.connection.on("disconnected", () => {
 
 mongoose.connection.on("connected", () => {
   console.log("mongoDB connected!");
+  // populateData().then(() => console.log("Test Data generated"));
 });
 
 // server.listen(port);

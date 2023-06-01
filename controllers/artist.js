@@ -169,7 +169,7 @@ const getAllRatings = async (req, res, next) => {
     const artist = await Artist.findOne({ _id: req.params.artistId });
     if (!artist) return next(createError(404, "Artist not logged in"));
     const ratingList = [];
-    console.log(artist.rating);
+    // console.log(artist.rating);
     for (let i = 0; i < artist.rating.length; i++) {
       const buyer = await Users.findOne({
         _id: artist.rating[i].buyerId,
@@ -199,7 +199,7 @@ const getRatingAverage = async (req, res, next) => {
     }
     res.status(200).json({
       totalRatings: totalRatings,
-      averageRating: Math.floor(sum / totalRatings),
+      averageRating: Math.floor(sum / totalRatings) ? Math.floor(sum / totalRatings) : 0,
     });
   } catch (error) {
     return next(createError(500, "Server Error"));

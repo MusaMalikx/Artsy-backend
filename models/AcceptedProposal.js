@@ -2,13 +2,14 @@ const mongoose = require("mongoose");
 const acceptedProposal = new mongoose.Schema(
   {
     buyerId: {
-      type: String,
-      ref: "User",
+      type: mongoose.Types.ObjectId,
+      ref: "users",
       required: true,
     },
     proposalId: {
-      type: String,
+      type: mongoose.Types.ObjectId,
       required: true,
+      ref: "buyerproposals",
     },
     paid: {
       type: Boolean,

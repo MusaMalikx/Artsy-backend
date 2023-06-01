@@ -58,7 +58,7 @@ const add = async (req, res, next) => {
     console.log(status);
     const newartwork = new Artworks({
       artistId: req.user.id,
-      images: paths,
+      images: req.body.productImage,
       status: status,
       ...req.body,
     });
@@ -145,21 +145,31 @@ const getArtworkImage = async (req, res, next) => {
 };
 
 const getAllArtworks = async (req, res, next) => {
-  try {
-    const artworksupcomming = await Artworks.find({ status: "comming soon" });
-    if (artworksupcomming) {
-      for (let i = 0; i < artworksupcomming.length; i++) {
-        const document = artworksupcomming[i];
-        const status = verifyStatus(document.startdate, document.enddate);
-        if (status === "live") {
-          document.status = "live";
-          await document.save();
-        }
-      }
-    }
+  // console.log(req.query);
 
-    const artworks = await Artworks.find({ status: "live" });
-    res.status(200).json(artworks);
+  try {
+    // const artworksupcomming = await Artworks.find({ status: "comming soon" });
+    // if (artworksupcomming) {
+    //   for (let i = 0; i < artworksupcomming.length; i++) {
+    //     const document = artworksupcomming[i];
+    //     const status = verifyStatus(document.startdate, document.enddate);
+    //     if (status === "live") {
+    //       document.status = "live";
+    //       await document.save();
+    //     }
+    //   }
+    // }
+    const { page, limit, status } = req.query;
+    const startIndex = (page - 1) * limit;
+    // const endIndex = page * limit;
+
+    const totalCount = await Artworks.countDocuments({ status: status });
+    const totalPages = Math.ceil(totalCount / limit);
+
+    const artworks = await Artworks.find({ status: status })
+      .skip(startIndex)
+      .limit(limit);
+    res.status(200).json({ artworks, total: totalCount });
   } catch (err) {
     next(createError(500, "Server Error"));
   }
@@ -190,12 +200,29 @@ const getAllArtworksHome = async (req, res, next) => {
 
 const getAllArtworksByCategory = async (req, res, next) => {
   try {
-    let { category } = req.query;
+    let { category, status, limit, page } = req.query;
+
+    const startIndex = (page - 1) * limit;
+    // const endIndex = page * limit;
+
+    const totalCount = await Artworks.countDocuments({ status: status });
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // const artworks = await Artworks.find({ status: status })
+    //   .skip(startIndex)
+    //   .limit(limit);
+    // res.status(200).json({ artworks, total: totalPages });
+
     const artworks = await Artworks.find({
-      status: "live",
+      status: status,
       category: category,
-    });
-    if (artworks) res.status(200).json(artworks);
+    })
+      // .skip(startIndex)
+      .limit(limit);
+
+    console.log(artworks);
+    // res.status(200).json({ artworks, total: totalPages });
+    if (artworks) res.status(200).json({ artworks, total: totalPages });
     else return next(createError(404, "Category Not Found"));
   } catch (err) {
     next(createError(500, "Server Error"));
@@ -223,7 +250,7 @@ const getSearchedArtwork = async (req, res, next) => {
         ],
       })),
     };
-    const artworks = await Artworks.find(searchQuery);
+    const artworks = await Artworks.find(searchQuery).limit(30);
 
     //Does not seprate out keywords and searches the exact String
     // const artworks = await Artworks.find({
@@ -256,6 +283,7 @@ const getBidInfo = async (req, res, next) => {
   try {
     const artwork = await Artworks.findOne({ _id: req.params.artId });
     if (!artwork) return next(createError(404, "Invalid Artwork"));
+    // console.log(artwork);
     res.status(200).json({
       currentBid: artwork.currentbid,
       basePrice: artwork.baseprice,

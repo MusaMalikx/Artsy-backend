@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const artistWalletSchema = new mongoose.Schema(
   {
     artistId: {
-      type: String,
+      type: mongoose.Types.ObjectId,
       required: true,
     },
     Amount: {
