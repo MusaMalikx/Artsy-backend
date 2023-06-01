@@ -169,7 +169,7 @@ const getAllArtworks = async (req, res, next) => {
     const artworks = await Artworks.find({ status: status })
       .skip(startIndex)
       .limit(limit);
-    res.status(200).json({ artworks, total: totalPages });
+    res.status(200).json({ artworks, total: totalCount });
   } catch (err) {
     next(createError(500, "Server Error"));
   }
@@ -217,10 +217,12 @@ const getAllArtworksByCategory = async (req, res, next) => {
       status: status,
       category: category,
     })
-      .skip(startIndex)
+      // .skip(startIndex)
       .limit(limit);
-    res.status(200).json({ artworks, total: totalPages });
-    if (artworks) res.status(200).json(artworks);
+
+    console.log(artworks);
+    // res.status(200).json({ artworks, total: totalPages });
+    if (artworks) res.status(200).json({ artworks, total: totalPages });
     else return next(createError(404, "Category Not Found"));
   } catch (err) {
     next(createError(500, "Server Error"));
