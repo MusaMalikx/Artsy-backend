@@ -2,6 +2,8 @@ const { createError } = require("../error");
 const Artworks = require("../models/Artwork");
 const Artist = require("../models/Artist");
 const fs = require("fs");
+const util = require("util");
+const readFileAsync = util.promisify(fs.readFile);
 const mime = require("mime");
 const { verifyStatus, verifyDates } = require("../utils/verifyStatus");
 const wonArtwork = require("../models/WonArtwork");
@@ -49,24 +51,30 @@ const add = async (req, res, next) => {
 
     console.log(req.files, req.body.title, req.user.id);
     const files = req.files;
-    const paths = files.map((file) => file.path); //All paths of images
+    const paths = files.map((file) => file.path); // All paths of images
 
-    // const msg = verifyDates(req.body.startdate, req.body.enddate);
-    // if (msg !== "correct") return next(createError(403, msg));
+    const imagesAll = await Promise.all(
+      paths.map(async (path) => {
+        try {
+          const data = await readFileAsync(path);
+          const base64Data = data.toString("base64");
+          return `data:image/jpeg;base64, ${base64Data}`;
+        } catch (err) {
+          throw createError(404, err.message);
+        }
+      })
+    );
 
     const status = verifyStatus(req.body.startdate, req.body.enddate);
     console.log(status);
     const newartwork = new Artworks({
       artistId: req.user.id,
-      images: req.body.productImage,
+      images: imagesAll,
       status: status,
       ...req.body,
     });
     const savedArtwork = await newartwork.save();
     res.status(200).json(savedArtwork);
-
-    //Now to get the image in get request we can make a new router.get("/uploads") where we find the url and return the image
-    //Or we can make the uploads folder publically available so browser can access the images  in app.js write app.use('/uploads' , express.static('uploads'));
   } catch (err) {
     next(createError(500, "Server Error"));
   }

@@ -28,8 +28,8 @@ router.get("/artwork/:id", getArtwork);
 router.delete("/artwork/delete/:id", verifyToken, deleteArtwork);
 
 //Create Artwork
-// router.post("/add", verifyToken, upload.array("productImage", 3), add);
-router.post("/add", verifyToken, add);
+router.post("/add", verifyToken, upload.array("productImage", 9), add);
+//router.post("/add", verifyToken, add);
 
 //Check Details
 router.post("/check", verifyToken, checkDuplicate);
