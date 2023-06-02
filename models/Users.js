@@ -48,6 +48,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    ratedArtist: {
+      type: Array,
+      default: [],
+    },
   },
   { timestamps: true }
 );

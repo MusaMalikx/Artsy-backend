@@ -947,6 +947,14 @@ const giveRating = async (req, res, next) => {
       },
     });
 
+    if (buyer.ratedArtist.indexOf(artist._id) === -1) {
+      await buyer.update({
+        $push: {
+          ratedArtist: artist._id,
+        },
+      });
+    }
+
     res.status(200).json("Rating succesfully placed!");
   } catch (err) {
     next(createError(500, "Server Error"));
