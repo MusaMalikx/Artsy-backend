@@ -298,6 +298,15 @@ class TestFramework {
             description: this.getRandomWords(50),
             date: this.getRandomDate(),
           };
+
+          if (buyer.ratedArtist.indexOf(_artist._id) === -1) {
+            await buyer.update({
+              $push: {
+                ratedArtist: _artist._id,
+              },
+            });
+          }
+          
           ratings.push(_rating);
         }
 
