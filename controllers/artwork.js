@@ -5,6 +5,8 @@ const fs = require("fs");
 const mime = require("mime");
 const { verifyStatus, verifyDates } = require("../utils/verifyStatus");
 const wonArtwork = require("../models/WonArtwork");
+const Users = require("../models/Users");
+const { default: mongoose } = require("mongoose");
 
 //gets a single artwork given its id
 const getArtwork = async (req, res, next) => {
@@ -43,6 +45,7 @@ const deleteArtwork = async (req, res, next) => {
 };
 
 const add = async (req, res, next) => {
+  console.log(req.body)
   try {
     const artist = await Artist.findOne({ _id: req.user.id });
     if (!artist) return next(createError(404, "Artist Not logged in!"));
@@ -483,6 +486,104 @@ const getArtistListedArtworks = async (req, res, next) => {
   }
 };
 
+const getRecommendation = async (req, res, next) => {
+
+  try {
+    const { artistId } = req.query;
+    const currentArtist = await Artist.findById(
+      mongoose.Types.ObjectId(artistId),
+      { rating: 1 }
+    );
+
+    let rating = 0;
+    for (let i = 0; i < currentArtist.rating.length; i++) {
+      rating += currentArtist.rating[i].ratedValue;
+    }
+
+    const averageRating =
+      rating / currentArtist.rating.length === 0
+        ? 1
+        : currentArtist.rating.length;
+
+    // console.log(averageRating);
+
+    const artist = await Artist.aggregate([
+      {
+        $match: {
+          _id: { $ne: mongoose.Types.ObjectId(artistId) },
+        },
+      },
+      {
+        $match: {
+          $expr: {
+            $gt: [{ $size: "$rating" }, 1],
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "artworks",
+          localField: "_id",
+          foreignField: "artistId",
+          let: { id: "$_id" },
+          pipeline: [{
+            $match: {
+              status: "live"
+            }
+          }],
+          as: "artwork",
+        },
+      },
+      {
+        $addFields: {
+          averageRating: { $avg: "$rating.ratedValue" },
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          artwork: 1,
+          distance: {
+            $sqrt: {
+              $add: [
+                {
+                  $pow: [
+                    {
+                      $subtract: [averageRating, "$averageRating"],
+                    },
+                    2,
+                  ],
+                },
+                {
+                  $pow: [{ $subtract: [averageRating, "$averageRating"] }, 2],
+                },
+              ],
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          distance: { $ne: null },
+        },
+      },
+      {
+        $sort: { distance: 1 },
+      },
+      {
+        $limit: 5,
+      },
+    ]).exec();
+    return res.status(200).json(artist);
+
+
+  } catch (error) {
+    next(error)
+  }
+
+
+}
+
 module.exports = {
   getArtwork,
   deleteArtwork,
@@ -500,4 +601,5 @@ module.exports = {
   updateStatus,
   getBiddersList,
   getArtistListedArtworks,
+  getRecommendation
 };
