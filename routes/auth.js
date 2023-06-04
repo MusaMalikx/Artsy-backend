@@ -16,6 +16,7 @@ const {
   googleSignupAdmin,
   googleSigninAdmin,
   signinArtistTest,
+  signinAdminTest,
 } = require("../controllers/auth.js");
 
 const router = express.Router();
@@ -46,6 +47,9 @@ router.post("/artist/google", googleAuthArtist);
 
 //Signin Admin
 router.post("/admin/signin", signinAdmin);
+
+//Signin Admin Test
+router.post("/admin/signin-test", signinAdminTest);
 
 //Signup Admin
 router.post("/admin/signup", signupAdmin);

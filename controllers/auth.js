@@ -69,7 +69,7 @@ const signinUserTest = async (req, res, next) => {
       email: req.body.email,
       password: req.body.password,
     });
-    console.log(user);
+    // console.log(user);
     if (!user) return next(createError(404, "User not found!"));
 
     const token = jwt.sign({ id: user._id }, process.env.JWT);
@@ -213,6 +213,24 @@ const signinArtistTest = async (req, res, next) => {
 const signinAdmin = async (req, res, next) => {
   try {
     const user = await User.findOne({ isAdmin: true, email: req.body.email });
+    if (!user) return next(createError(401, "User not found!"));
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT);
+
+    const object = {
+      token: token,
+      user: user._doc,
+    };
+
+    res.status(200).json(object);
+  } catch (err) {
+    next(createError(500, "Server Error"));
+  }
+};
+
+const signinAdminTest = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ isAdmin: true, email: req.body.email, password: req.body.password });
     if (!user) return next(createError(401, "User not found!"));
 
     const token = jwt.sign({ id: user._id }, process.env.JWT);
@@ -393,6 +411,7 @@ module.exports = {
   signinArtist,
   signinArtistTest,
   signinAdmin,
+  signinAdminTest,
   signupAdmin,
   googleAuthUser,
   googleAuthArtist,
