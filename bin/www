@@ -28,7 +28,7 @@ const server = http.createServer(app);
  */
 
 mongoose.set("strictQuery", false);
-const MONGO = process.env.MONGO_URL || "mongodb://localhost:27017/Artsy";
+const MONGO = process.env.MONGO_URL || process.env.MONGO_LOCAL;
 
 const connect = async () => {
   try {
