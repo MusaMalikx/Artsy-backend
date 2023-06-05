@@ -105,7 +105,7 @@ class TestFramework {
       case 1:
         return "closed";
       case 2:
-        return "upcoming";
+        return "coming soon";
     }
   }
 
@@ -196,6 +196,16 @@ class TestFramework {
     try {
       let artists = [];
 
+      const _artist = {
+        name: this.getRandomName(),
+        firebaseid: this.getRandomText(10) + this.getRandomWord(),
+        email: "artist@gmail.com",
+        phonenumber: this.getRandomNumber(),
+        cnic: this.getRandomCnic(),
+        fromGoogle: this.getRandomBoolean(),
+      };
+      artists.push(_artist);
+
       for (let i = 0; i < len; i++) {
         const _artist = {
           name: this.getRandomName(),
@@ -222,6 +232,30 @@ class TestFramework {
   async generateUsers(len) {
     try {
       let users = [];
+
+      const _user = {
+        name: this.getRandomName(),
+        firebaseid: this.getRandomText(10) + this.getRandomWord(),
+        email: "buyer@gmail.com",
+        phonenumber: this.getRandomNumber(),
+        cnic: this.getRandomCnic(),
+        fromGoogle: this.getRandomBoolean(),
+        isAdmin: false,
+        location: this.getRandomCity(),
+      };
+      users.push(_user);
+
+      const _user_ = {
+        name: this.getRandomName(),
+        firebaseid: this.getRandomText(10) + this.getRandomWord(),
+        email: "admin@gmail.com",
+        phonenumber: this.getRandomNumber(),
+        cnic: this.getRandomCnic(),
+        fromGoogle: this.getRandomBoolean(),
+        isAdmin: true,
+        location: this.getRandomCity(),
+      };
+      users.push(_user_);
 
       for (let i = 0; i < len; i++) {
         const _user = {
@@ -306,7 +340,7 @@ class TestFramework {
               },
             });
           }
-          
+
           ratings.push(_rating);
         }
 
