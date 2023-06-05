@@ -47,7 +47,7 @@ const deleteArtwork = async (req, res, next) => {
 };
 
 const add = async (req, res, next) => {
-  console.log(req.body)
+  console.log(req.body);
   try {
     const artist = await Artist.findOne({ _id: req.user.id });
     if (!artist) return next(createError(404, "Artist Not logged in!"));
@@ -495,7 +495,6 @@ const getArtistListedArtworks = async (req, res, next) => {
 };
 
 const getRecommendation = async (req, res, next) => {
-
   try {
     const { artistId } = req.query;
     const currentArtist = await Artist.findById(
@@ -515,82 +514,83 @@ const getRecommendation = async (req, res, next) => {
 
     // console.log(averageRating);
 
-    const artist = await Artist.aggregate([
-      {
-        $match: {
-          _id: { $ne: mongoose.Types.ObjectId(artistId) },
-        },
-      },
-      {
-        $match: {
-          $expr: {
-            $gt: [{ $size: "$rating" }, 1],
+    if (averageRating !== 0) {
+      const artist = await Artist.aggregate([
+        {
+          $match: {
+            _id: { $ne: mongoose.Types.ObjectId(artistId) },
           },
         },
-      },
-      {
-        $lookup: {
-          from: "artworks",
-          localField: "_id",
-          foreignField: "artistId",
-          let: { id: "$_id" },
-          pipeline: [{
-            $match: {
-              status: "live"
-            }
-          }],
-          as: "artwork",
-        },
-      },
-      {
-        $addFields: {
-          averageRating: { $avg: "$rating.ratedValue" },
-        },
-      },
-      {
-        $project: {
-          name: 1,
-          artwork: 1,
-          distance: {
-            $sqrt: {
-              $add: [
-                {
-                  $pow: [
-                    {
-                      $subtract: [averageRating, "$averageRating"],
-                    },
-                    2,
-                  ],
-                },
-                {
-                  $pow: [{ $subtract: [averageRating, "$averageRating"] }, 2],
-                },
-              ],
+        {
+          $match: {
+            $expr: {
+              $gt: [{ $size: "$rating" }, 1],
             },
           },
         },
-      },
-      {
-        $match: {
-          distance: { $ne: null },
+        {
+          $lookup: {
+            from: "artworks",
+            localField: "_id",
+            foreignField: "artistId",
+            let: { id: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  status: "live",
+                },
+              },
+            ],
+            as: "artwork",
+          },
         },
-      },
-      {
-        $sort: { distance: 1 },
-      },
-      {
-        $limit: 5,
-      },
-    ]).exec();
-    return res.status(200).json(artist);
-
-
+        {
+          $addFields: {
+            averageRating: { $avg: "$rating.ratedValue" },
+          },
+        },
+        {
+          $project: {
+            name: 1,
+            artwork: 1,
+            distance: {
+              $sqrt: {
+                $add: [
+                  {
+                    $pow: [
+                      {
+                        $subtract: [averageRating, "$averageRating"],
+                      },
+                      2,
+                    ],
+                  },
+                  {
+                    $pow: [{ $subtract: [averageRating, "$averageRating"] }, 2],
+                  },
+                ],
+              },
+            },
+          },
+        },
+        {
+          $match: {
+            distance: { $ne: null },
+          },
+        },
+        {
+          $sort: { distance: 1 },
+        },
+        {
+          $limit: 5,
+        },
+      ]).exec();
+      return res.status(200).json(artist);
+    }
+    return res.status(200).json("no recommendations");
   } catch (error) {
-    next(error)
+    next(error);
   }
-
-
-}
+};
 
 module.exports = {
   getArtwork,
@@ -609,5 +609,5 @@ module.exports = {
   updateStatus,
   getBiddersList,
   getArtistListedArtworks,
-  getRecommendation
+  getRecommendation,
 };

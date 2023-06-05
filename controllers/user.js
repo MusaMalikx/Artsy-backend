@@ -59,11 +59,39 @@ const getAllCount = async (req, res, next) => {
     const admins = await User.find({ isAdmin: true });
     const artists = await Artist.find({});
     const artworks = await Artwork.find({});
+    const liveArtworks = await Artwork.countDocuments({ status: "live" });
+    const closedArtworks = await Artwork.countDocuments({ status: "closed" });
+    const comingSoonArtworks = await Artwork.countDocuments({
+      status: "coming soon",
+    });
+    const reports = await Reports.countDocuments();
+    const buyerProposals = await BuyerProposal.countDocuments();
+    const acceptedProposals = await AcceptedProposal.countDocuments();
+    const wonArtworks = await WonArtwork.countDocuments();
+    const claimWonArtworks = await WonArtwork.countDocuments({
+      status: "claim",
+    });
+    const paidWonArtworks = await WonArtwork.countDocuments({ status: "paid" });
+    const pendingWonArtworks = await WonArtwork.countDocuments({
+      status: "pending",
+    });
+
     res.status(200).json({
       users: users.length,
       admins: admins.length,
       artists: artists.length,
       artworks: artworks.length,
+      liveArtworks: liveArtworks,
+      closedArtworks: closedArtworks,
+      comingSoonArtworks: comingSoonArtworks,
+      reports: reports,
+      buyerProposals,
+      acceptedProposals,
+      notAcceptedProposals: buyerProposals - acceptedProposals,
+      wonArtworks,
+      claimWonArtworks,
+      paidWonArtworks,
+      pendingWonArtworks,
     });
   } catch (err) {
     next(createError(500, "Server Error"));

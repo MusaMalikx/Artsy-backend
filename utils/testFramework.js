@@ -287,17 +287,29 @@ class TestFramework {
       let artworks = [];
 
       for (let i = 0; i < len; i++) {
-        const startdate = this.getRandomDate();
+        const futureDate = this.getFutureDate(Date.now());
+        const pastDate = this.getPastDate(Date.now());
+        const status = this.getRandomArtworkStatus();
         const _artwork = {
           artistId: this.getRandomArrayElement(artistIds),
           title: this.getRandomWord(),
-          startdate: startdate,
-          enddate: this.getFutureDate(startdate),
+          startdate:
+            status === "coming soon"
+              ? futureDate
+              : status === "closed"
+              ? pastDate
+              : pastDate,
+          enddate:
+            status === "coming soon"
+              ? this.getFutureDate(futureDate)
+              : status === "closed"
+              ? this.getPastDate(pastDate)
+              : futureDate,
           baseprice: this.getRandomNumber(),
           category: this.getRandomCategory(),
           description: this.getRandomWords(100),
           images: this.getRandomArtwork(),
-          status: this.getRandomArtworkStatus(),
+          status: status,
         };
         artworks.push(_artwork);
       }
