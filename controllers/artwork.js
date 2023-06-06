@@ -383,7 +383,7 @@ const getArtistListedArtworks = async (req, res, next) => {
     if (status === "All") {
       const artworks = await Artworks.aggregate([
         {
-          $match: { artistId: req.user.id },
+          $match: { artistId: mongoose.Types.ObjectId(req.user.id) },
         },
         {
           $lookup: {
@@ -437,7 +437,10 @@ const getArtistListedArtworks = async (req, res, next) => {
     } else {
       const artworks = await Artworks.aggregate([
         {
-          $match: { artistId: req.user.id, status: status.toLowerCase() },
+          $match: {
+            artistId: mongoose.Types.ObjectId(req.user.id),
+            status: status.toLowerCase(),
+          },
         },
         {
           $lookup: {

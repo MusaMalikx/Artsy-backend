@@ -15,6 +15,7 @@ const WonArtwork = require("../models/WonArtwork");
 const Users = require("../models/Users");
 const Artwork = require("../models/Artwork");
 const Reports = require("../models/Reports");
+const { default: mongoose } = require("mongoose");
 
 const update = async (req, res, next) => {
   if (req.params.id === req.user.id) {
@@ -62,7 +63,7 @@ const getAllCount = async (req, res, next) => {
     const liveArtworks = await Artwork.countDocuments({ status: "live" });
     const closedArtworks = await Artwork.countDocuments({ status: "closed" });
     const comingSoonArtworks = await Artwork.countDocuments({
-      status: "coming soon",
+      status: "comming soon",
     });
     const reports = await Reports.countDocuments();
     const buyerProposals = await BuyerProposal.countDocuments();
@@ -607,6 +608,10 @@ const acceptProposal = async (req, res, next) => {
       description: proposal.description,
       dateCreated: proposal.dateCreated,
       ...req.body,
+      artistInfo: {
+        artistId: mongoose.Types.ObjectId(req.body.artistInfo.artistId),
+        artistName: req.body.artistInfo.artistName,
+      },
     };
     const acceptProposal = new AcceptedProposal(info);
     const savedProposal = await acceptProposal.save();

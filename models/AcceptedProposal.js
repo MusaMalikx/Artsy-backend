@@ -3,7 +3,7 @@ const acceptedProposal = new mongoose.Schema(
   {
     buyerId: {
       type: mongoose.Types.ObjectId,
-      ref: "users",
+      ref: "User",
       required: true,
     },
     proposalId: {

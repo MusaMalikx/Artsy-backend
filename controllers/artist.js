@@ -5,6 +5,7 @@ const BuyerProposal = require("../models/BuyerProposal");
 const Users = require("../models/Users");
 const WalletArtist = require("../models/WalletArtist");
 const Reports = require("../models/Reports");
+const { default: mongoose } = require("mongoose");
 
 //Add amount in the wallet
 const addWallet = async (req, res, next) => {
@@ -148,8 +149,9 @@ const getAcceptedProposals = async (req, res, next) => {
   try {
     const artist = await Artist.findOne({ _id: req.user.id });
     if (!artist) return next(createError(404, "Artist not logged in"));
-
-    AcceptedProposal.find({ "artistInfo.artistId": req.user.id })
+    AcceptedProposal.find({
+      "artistInfo.artistId": mongoose.Types.ObjectId(req.user.id),
+    })
       .populate("buyerId", "name")
       .exec((err, proposals) => {
         if (err) {
@@ -199,7 +201,9 @@ const getRatingAverage = async (req, res, next) => {
     }
     res.status(200).json({
       totalRatings: totalRatings,
-      averageRating: Math.floor(sum / totalRatings) ? Math.floor(sum / totalRatings) : 0,
+      averageRating: Math.floor(sum / totalRatings)
+        ? Math.floor(sum / totalRatings)
+        : 0,
     });
   } catch (error) {
     return next(createError(500, "Server Error"));
@@ -226,7 +230,7 @@ const updateInfo = async (req, res, next) => {
       },
     });
     res.status(200).json("Artist Information Updated Succesfully");
-      } catch (err) {
+  } catch (err) {
     next(createError(500, "Server Error"));
   }
 };
