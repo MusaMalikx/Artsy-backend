@@ -105,7 +105,7 @@ class TestFramework {
       case 1:
         return "closed";
       case 2:
-        return "coming soon";
+        return "comming soon";
     }
   }
 
@@ -294,13 +294,13 @@ class TestFramework {
           artistId: this.getRandomArrayElement(artistIds),
           title: this.getRandomWord(),
           startdate:
-            status === "coming soon"
+            status === "comming soon"
               ? futureDate
               : status === "closed"
               ? pastDate
               : pastDate,
           enddate:
-            status === "coming soon"
+            status === "comming soon"
               ? this.getFutureDate(futureDate)
               : status === "closed"
               ? this.getPastDate(pastDate)
