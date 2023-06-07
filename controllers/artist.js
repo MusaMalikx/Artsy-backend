@@ -7,6 +7,28 @@ const WalletArtist = require("../models/WalletArtist");
 const Reports = require("../models/Reports");
 const { default: mongoose } = require("mongoose");
 
+//Warn Artist
+const warnArtist = async (req, res, next) => {
+  try {
+    const artistId = req.params.id;
+    const artist = await Artist.findById(artistId);
+    if (!artist) {
+      return res.status(404).json({ error: "Artist not found" });
+    }
+
+    if (artist.warnings >= 3) {
+      return res.status(400).json({ error: "Artist Already Banned!" });
+    }
+
+    artist.warnings += 1;
+    await artist.save();
+
+    res.status(200).json(artist.name);
+  } catch (err) {
+    return next(createError(500, "Server Error!"));
+  }
+};
+
 //Add amount in the wallet
 const addWallet = async (req, res, next) => {
   try {
@@ -288,4 +310,5 @@ module.exports = {
   deleteArtist,
   updateInfo,
   reportBuyer,
+  warnArtist,
 };

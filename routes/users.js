@@ -27,9 +27,13 @@ const {
   getAllCount,
   updateInfo,
   getAllReports,
+  warnUser,
 } = require("../controllers/user");
 
 const router = express.Router();
+
+//Warn User
+router.put("/warn/:id", warnUser);
 
 //update user
 router.put("/update/:id", verifyToken, update);

@@ -13,9 +13,13 @@ const {
   reportBuyer,
   deleteArtist,
   updateInfo,
+  warnArtist,
 } = require("../controllers/artist");
 
 const router = express.Router();
+
+//warn an artist
+router.put("/warn/:id", warnArtist);
 
 //get an artist
 router.get("/find/:id", getArtist);

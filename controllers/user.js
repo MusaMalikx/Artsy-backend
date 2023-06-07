@@ -17,6 +17,28 @@ const Artwork = require("../models/Artwork");
 const Reports = require("../models/Reports");
 const { default: mongoose } = require("mongoose");
 
+//Warn User
+const warnUser = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const user = await Users.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Buyer not found" });
+    }
+
+    if (user.warnings >= 3) {
+      return res.status(400).json({ error: "Buyer Already Banned!" });
+    }
+
+    user.warnings += 1;
+    await user.save();
+
+    res.status(200).json(user.name);
+  } catch (err) {
+    return next(createError(500, "Server Error!"));
+  }
+};
+
 const update = async (req, res, next) => {
   if (req.params.id === req.user.id) {
     try {
@@ -1095,4 +1117,5 @@ module.exports = {
   deleteUser,
   updateInfo,
   getAllReports,
+  warnUser,
 };
