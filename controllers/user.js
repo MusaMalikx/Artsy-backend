@@ -17,6 +17,32 @@ const Artwork = require("../models/Artwork");
 const Reports = require("../models/Reports");
 const { default: mongoose } = require("mongoose");
 
+//Unban User
+const unbanUser = async (req, res, next) => {
+  try {
+    //Frontend pai headers mai token = "Bearer token"
+    const admin = await Users.findOne({ isAdmin: true, _id: req.user.id });
+    if (!admin) return next(createError(401, "Admin Not signedIn!"));
+
+    const userId = req.params.id;
+    const user = await Users.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Buyer not found" });
+    }
+
+    if (user.warnings < 3) {
+      return res.status(400).json({ error: "Buyer Already Active" });
+    }
+
+    user.warnings -= 1;
+    await user.save();
+
+    res.status(200).json(user.name);
+  } catch (err) {
+    return next(createError(500, "Server Error!"));
+  }
+};
+
 //Warn User
 const warnUser = async (req, res, next) => {
   try {
@@ -1118,4 +1144,5 @@ module.exports = {
   updateInfo,
   getAllReports,
   warnUser,
+  unbanUser,
 };

@@ -7,6 +7,31 @@ const WalletArtist = require("../models/WalletArtist");
 const Reports = require("../models/Reports");
 const { default: mongoose } = require("mongoose");
 
+//Unban Artist
+const unbanArtist = async (req, res, next) => {
+  try {
+    const admin = await Users.findOne({ isAdmin: true, _id: req.user.id });
+    if (!admin) return next(createError(401, "Admin Not signedIn!"));
+
+    const artistId = req.params.id;
+    const artist = await Artist.findById(artistId);
+    if (!artist) {
+      return res.status(404).json({ error: "Artist not found" });
+    }
+
+    if (artist.warnings < 3) {
+      return res.status(400).json({ error: "Artist Already Active" });
+    }
+
+    artist.warnings -= 1;
+    await artist.save();
+
+    res.status(200).json(artist.name);
+  } catch (err) {
+    return next(createError(500, "Server Error!"));
+  }
+};
+
 //Warn Artist
 const warnArtist = async (req, res, next) => {
   try {
@@ -311,4 +336,5 @@ module.exports = {
   updateInfo,
   reportBuyer,
   warnArtist,
+  unbanArtist,
 };
