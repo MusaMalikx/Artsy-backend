@@ -47,6 +47,7 @@ const signinUser = async (req, res, next) => {
   try {
     const user = await User.findOne({ isAdmin: false, email: req.body.email });
     if (!user) return next(createError(404, "User not found!"));
+    if (user.warnings === 3) return next(createError(404, "User Banned!"));
 
     const token = jwt.sign({ id: user._id }, process.env.JWT);
 
@@ -71,6 +72,8 @@ const signinUserTest = async (req, res, next) => {
     });
     // console.log(user);
     if (!user) return next(createError(404, "User not found!"));
+
+    if (user.warnings === 3) return next(createError(404, "User Banned!"));
 
     const token = jwt.sign({ id: user._id }, process.env.JWT);
 
@@ -173,6 +176,7 @@ const signinArtist = async (req, res, next) => {
   try {
     const artist = await Artist.findOne({ email: req.body.email });
     if (!artist) return next(createError(404, "User not found!"));
+    if (artist.warnings === 3) return next(createError(404, "User Banned!"));
 
     const token = jwt.sign({ id: artist._id }, process.env.JWT);
 
@@ -196,6 +200,8 @@ const signinArtistTest = async (req, res, next) => {
     });
     console.log(user);
     if (!user) return next(createError(404, "User not found!"));
+
+    if (user.warnings === 3) return next(createError(404, "User Banned!"));
 
     const token = jwt.sign({ id: user._id }, process.env.JWT);
 
@@ -230,7 +236,11 @@ const signinAdmin = async (req, res, next) => {
 
 const signinAdminTest = async (req, res, next) => {
   try {
-    const user = await User.findOne({ isAdmin: true, email: req.body.email, password: req.body.password });
+    const user = await User.findOne({
+      isAdmin: true,
+      email: req.body.email,
+      password: req.body.password,
+    });
     if (!user) return next(createError(401, "User not found!"));
 
     const token = jwt.sign({ id: user._id }, process.env.JWT);
@@ -313,6 +323,7 @@ const googleAuthUser = async (req, res, next) => {
   try {
     const user = await User.findOne({ isAdmin: false, email: req.body.email });
     if (user) {
+      if (user.warnings === 3) return next(createError(404, "User Banned!"));
       const token = jwt.sign({ id: user._id }, process.env.JWT);
       const object = {
         token: token,
@@ -357,6 +368,7 @@ const googleAuthArtist = async (req, res, next) => {
   try {
     const artist = await Artist.findOne({ email: req.body.email });
     if (artist) {
+      if (artist.warnings === 3) return next(createError(404, "User Banned!"));
       const token = jwt.sign({ id: artist._id }, process.env.JWT);
       const object = {
         token: token,

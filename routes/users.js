@@ -27,9 +27,17 @@ const {
   getAllCount,
   updateInfo,
   getAllReports,
+  warnUser,
+  unbanUser,
 } = require("../controllers/user");
 
 const router = express.Router();
+
+//Unban User
+router.put("/unban/:id", verifyToken, unbanUser);
+
+//Warn User
+router.put("/warn/:id", warnUser);
 
 //update user
 router.put("/update/:id", verifyToken, update);

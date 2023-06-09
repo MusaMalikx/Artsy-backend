@@ -13,9 +13,17 @@ const {
   reportBuyer,
   deleteArtist,
   updateInfo,
+  warnArtist,
+  unbanArtist,
 } = require("../controllers/artist");
 
 const router = express.Router();
+
+//Unban artist
+router.put("/unban/:id", verifyToken, unbanArtist);
+
+//warn an artist
+router.put("/warn/:id", warnArtist);
 
 //get an artist
 router.get("/find/:id", getArtist);
