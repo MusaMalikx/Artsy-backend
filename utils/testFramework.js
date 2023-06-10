@@ -214,6 +214,7 @@ class TestFramework {
           phonenumber: this.getRandomNumber(),
           cnic: this.getRandomCnic(),
           fromGoogle: this.getRandomBoolean(),
+          warnings: this.getRandomNumber(0, 3),
         };
         artists.push(_artist);
       }
@@ -242,6 +243,7 @@ class TestFramework {
         fromGoogle: this.getRandomBoolean(),
         isAdmin: false,
         location: this.getRandomCity(),
+        warnings: this.getRandomNumber(0, 3),
       };
       users.push(_user);
 
