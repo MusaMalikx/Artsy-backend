@@ -8,7 +8,7 @@ const mime = require("mime");
 const { verifyStatus, verifyDates } = require("../utils/verifyStatus");
 const wonArtwork = require("../models/WonArtwork");
 const Users = require("../models/Users");
-const { default: mongoose } = require("mongoose");
+const { default: mongoose, Mongoose } = require("mongoose");
 
 //gets a single artwork given its id
 const getArtwork = async (req, res, next) => {
@@ -500,11 +500,8 @@ const getArtistListedArtworks = async (req, res, next) => {
 const getRecommendation = async (req, res, next) => {
   try {
     const { artistId } = req.query;
-    const currentArtist = await Artist.findById(
-      mongoose.Types.ObjectId(artistId),
-      { rating: 1 }
-    );
-
+    const currentArtist = await Artist.findById(artistId);
+    if (!currentArtist) return next(createError(404, "Artist not found!"));
     let rating = 0;
     for (let i = 0; i < currentArtist.rating.length; i++) {
       rating += currentArtist.rating[i].ratedValue;
@@ -589,7 +586,7 @@ const getRecommendation = async (req, res, next) => {
       ]).exec();
       return res.status(200).json(artist);
     }
-    return res.status(200).json("no recommendations");
+    return res.status(200).json([]);
   } catch (error) {
     next(error);
   }
