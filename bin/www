@@ -45,7 +45,7 @@ mongoose.connection.on("disconnected", () => {
 
 mongoose.connection.on("connected", () => {
   console.log("mongoDB connected!");
-  // populateData().then(() => console.log("Test Data generated"));
+  //populateData().then(() => console.log("Test Data generated"));
 });
 
 // server.listen(port);

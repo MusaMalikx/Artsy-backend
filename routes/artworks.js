@@ -45,7 +45,7 @@ router.get("/artist/status/:artistId", getCountArtworksStaus);
 router.get("/image", getArtworkImage);
 
 //Get All artworks
-router.get("/all", getAllArtworks);
+router.get("/all", getAllArtworks);  
 
 //Get All for Home page
 router.get("/all/home", getAllArtworksHome);
