@@ -8,7 +8,7 @@ const mime = require("mime");
 const { verifyStatus, verifyDates } = require("../utils/verifyStatus");
 const wonArtwork = require("../models/WonArtwork");
 const Users = require("../models/Users");
-const { default: mongoose, Mongoose } = require("mongoose");
+const mongoose = require("mongoose");
 
 //gets a single artwork given its id
 const getArtwork = async (req, res, next) => {
@@ -500,8 +500,11 @@ const getArtistListedArtworks = async (req, res, next) => {
 const getRecommendation = async (req, res, next) => {
   try {
     const { artistId } = req.query;
-    const currentArtist = await Artist.findById(artistId);
-    if (!currentArtist) return next(createError(404, "Artist not found!"));
+    const currentArtist = await Artist.findById(
+      mongoose.Types.ObjectId(artistId),
+      { rating: 1 }
+    );
+    // if (!currentArtist) return next(createError(404, "Artist not found!"));
     let rating = 0;
     for (let i = 0; i < currentArtist.rating.length; i++) {
       rating += currentArtist.rating[i].ratedValue;
